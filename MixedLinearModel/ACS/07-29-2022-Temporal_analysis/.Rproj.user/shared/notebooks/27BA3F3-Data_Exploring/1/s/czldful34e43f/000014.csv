@@ -1,0 +1,10 @@
+"0","```r
+#   plot(ind)
+#   myplots[[i]] <- ind
+#   i <- i + 1
+# }
+# 
+# ggsave(file = file.path(results.IgG, paste(\"Lg.Cyt.0tc.Bool\", \".png\", sep = \"\")), p, width = 12, height = 8, dpi = 300)
+# dev.off()
+
+```"

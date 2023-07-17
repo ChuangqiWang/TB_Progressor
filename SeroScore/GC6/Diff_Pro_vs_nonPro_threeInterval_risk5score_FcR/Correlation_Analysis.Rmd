@@ -1,0 +1,225 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+meta_colors <- list(
+  "group" = c(
+    "NA" = "gray", 
+    "progressor" = "#fe9300",
+    "non-progressor" = "#009093"
+    )
+)
+```
+
+
+```{r}
+library(DMwR2)
+#Data a folder to save the results.
+output_dir <- 'Progressor_allmonths'
+
+Data_group <- readRDS(file.path(output_dir, "Data_group.RDS"))
+Data_group <- factor(Data_group, levels = c("non-progressor", "progressor"))
+Data_combining <- readRDS(file.path(output_dir, "Data_combining.RDS"))
+
+#Data_combining_scale <- Data_combining
+#Z-score the data to bring the parameters to the same scale.
+Data_combining_scale <- scale(Data_combining, center = TRUE, scale = TRUE) #knnImputation(Data_combining)
+colnames(Data_combining_scale) <- colnames(Data_combining)
+rownames(Data_combining_scale) <- rownames(Data_combining)
+```
+
+
+```{r}
+## Provide the dir name(i.e sub dir) that you want to create under main dir:
+saved.dir <- 'Progressor_allmonths_Correlation_Analysis'
+
+if (!dir.exists(saved.dir)){
+dir.create(saved.dir)
+}
+```
+
+Identify the enrichness
+```{r}
+library(ggplot2)
+library(ggpubr)
+library(dplyr)
+library(rstatix)
+plt.fig <- list()
+
+selected_features <- c("IgG_LAM", "IgG_ESAT6", "IgG2_PPD",  "IgG3_CFP10", "IgG3_ESAT6",
+                         "IgA1_PPD", "IgA1_HspX", "IgM_Ag85")
+
+
+Enriched_group <- c()
+for(index in 1 : length(selected_features)){
+  temp.features <- unlist(Data_combining[, selected_features[index]])
+  data.mlm <- data.frame(feature = temp.features, group = Data_group)
+  rownames(data.mlm) <- rownames(Data_combining)
+  #Add some statistical testing
+  stat.test <- data.mlm %>%
+    wilcox_test(feature ~ group) %>%
+    adjust_pvalue(method = "BH") %>%
+    add_significance("p")
+  # Box plots with p-values
+  stat.test <- stat.test %>%
+    add_xy_position(x = "group", dodge = 0.8)
+  
+  #Basic model without considering WHO.max
+  ###########################################Explained Model
+  plt.fig[[selected_features[index]]] <- 
+  ggplot(data.mlm, aes(x=Data_group, y=feature)) +#, fill = SymOnSet)) +
+    geom_boxplot(aes_string(color = "Data_group"), outlier.color = NA) +
+    geom_point(aes_string(color = "Data_group"), size = 0.5, position = position_jitterdodge()) +
+    scale_color_manual(values = meta_colors$group) +
+    labs(x = "Group", y = selected_features[index]) +
+    stat_pvalue_manual(stat.test, label = "p.signif", tip.length = 0.03, bracket.nudge.y = 0.30, bracket.size = 0.4, hide.ns = TRUE, size = 6) + #p.adj.signif
+    theme_classic(base_size = 8) +
+    theme(legend.position="none")
+  
+  temp_progressor <- which(data.mlm$group == "progressor")
+  temp_flag <- median(data.mlm[temp_progressor, ]$feature) > median(data.mlm[-temp_progressor, ]$feature)
+  if(temp_flag){
+    Enriched_group[index] <- "progressor"
+  }else{
+    Enriched_group[index] <- "non-progressor"
+  }
+}
+
+p <- ggarrange(plotlist = plt.fig, ncol = 3, nrow = 2, common.legend = TRUE)
+pdf(file.path(saved.dir, paste0("univ_Group.pdf")), width = 6, height = 5)
+print(p)
+dev.off()
+
+```
+
+
+
+
+```{r}
+default_threshold = 0.5
+
+#Create a folder to save the results.
+saved.dir <- paste0('./Correlation_visualization_', toString(default_threshold))
+if (!dir.exists(saved.dir)){
+  dir.create((saved.dir))
+}
+
+```
+
+```{r correlation heatmap}
+library(RColorBrewer)
+library(backports)
+library(Hmisc)
+library(corrplot)
+library(pheatmap)
+library(binaryLogic)
+corrMat <- rcorr(Data_combining_scale, type = "spearman")
+# heatmap for full correlation matrix
+
+png(file.path(saved.dir, "corrMat.coeff.v2.png"), width = 3860, height = 3860, res = 300)
+pheatmap(corrMat$r, cluster_rows = TRUE, cluster_cols = TRUE,       
+         color = rev(colorRampPalette(brewer.pal(n = 10, name = "RdBu"))(100)),
+         breaks = seq(-1,1, length = 100)) # fix color scale to make interpretation easier
+dev.off()
+
+png(file.path(saved.dir, "corrMat.coeff.upper.png"), width = 3260, height = 3260, res = 300)
+corrplot(corrMat$r, type = "upper", order = "hclust", 
+         tl.col = "black", tl.srt = 60)
+dev.off()
+
+# keep only selected features and highly correlated features
+corrMat.r <- corrMat$r
+colMax <- function(X) apply(X, 2, max)
+corrMat.coef <- corrMat.r[selected_features, ]
+corrMat.coef.selected <- corrMat.coef[, which(colMax(abs(corrMat.coef)) < 1 & colMax(abs(corrMat.coef)) > default_threshold)]
+
+corrMat.pvalue <- corrMat$P
+corrMat.significant.pvalue <- corrMat.pvalue[selected_features, ]
+corrMat.significant.pvalue <- corrMat.significant.pvalue[, which(colMax(abs(corrMat.coef)) < 1 & colMax(abs(corrMat.coef)) > default_threshold)]
+corrMat.adjpvalue <- corrMat.significant.pvalue
+for(index in 1 : dim(corrMat.significant.pvalue)[1])
+  corrMat.adjpvalue[index, ] <- p.adjust(corrMat.significant.pvalue[index, ], method = "BH")
+# heatmap for reduced correlation matrix
+
+png(file.path(saved.dir, "corrMat.coeff.selected.png"), width = 2460, height = 960, res = 300)
+pheatmap(corrMat.coef.selected, cluster_rows = FALSE, cluster_cols = FALSE,        
+         color = rev(colorRampPalette(brewer.pal(n = 10, name = "RdBu"))(100)),
+         breaks = seq(-1, 1, length = 100))
+dev.off()
+
+#corrMat.adjpvalue.sig <- (corrMat.adjpvalue < 0.05)
+# heatmap for reduced correlation matrix
+```
+
+draw the graph visualization
+```{r}
+library(tidyverse)
+library(igraph)
+library(ggraph)
+library(ggrepel)
+library(RColorBrewer)
+library(reshape2)
+library(spdep)
+melt.coef.selected <- melt(corrMat.coef.selected)
+melt.adjpvalue.selected <- melt(corrMat.adjpvalue)
+adjpvalue.selected.index <- which(melt.adjpvalue.selected$value < 0.05)
+
+melt.coef.selected.sign <- melt.coef.selected[adjpvalue.selected.index, ]
+melt.adjpvalue.selected.sign <- melt.adjpvalue.selected[adjpvalue.selected.index, ]
+colnames(melt.coef.selected.sign) <- c("x", "y", "corr.coef")
+#Plot
+graphCors <- melt.coef.selected.sign %>% 
+  filter(abs(corr.coef) > default_threshold  & (is.element(x, selected_features) | is.element(y, selected_features))) %>% 
+  graph_from_data_frame(directed = FALSE)
+
+layout <- create_layout(graphCors, layout = 'igraph', algorithm = 'nicely')
+#manual_layout <- create_layout(graph = igraph_data,
+#              layout = "manual", node.positions = data2)
+#layout_coordinates <- as.matrix(layout[, c(1,2)])
+#layout_v2 <- Rotation(layout_coordinates, 10*pi/180)
+#layout$x <- layout_v2[, 1]
+#layout$y <- layout_v2[, 2]
+#color the node.
+temp.index <- which(layout$name %in% selected_features)
+group <- rep("NO", dim(layout)[1])
+group[temp.index] <- "YES"
+layout$group <- factor(group)
+
+color <- rep("NA", dim(layout)[1])
+for(index in 1:dim(layout)[1]){
+  temp.index <- which(layout[index, ]$name == selected_features)
+  #print(temp.index)
+  if(length(temp.index) == 1){
+    color[index] <- Enriched_group[temp.index]
+  }
+}
+layout$color <- factor(color)
+
+```
+
+```{r}
+pltGraph <- ggraph(graph = layout, res = 300) +
+  geom_edge_link(aes(color = corr.coef), edge_width = 1) +
+  guides(edge_alpha = "none", edge_width = "none") +
+  scale_edge_colour_gradientn(limits = c(-1, 1), colors = rev(colorRampPalette(brewer.pal(n = 10, name = "RdBu"))(100))) +
+  geom_node_point(aes(size = group, fill = color), shape = 21) +
+  scale_fill_manual(values = meta_colors$group) +
+  labs(fill = "Enriched in", size = "Lasso Selection") +
+  geom_node_text(aes(label = name), size = 2.5, colour = "black", repel = TRUE, point.padding = unit(0.5, "lines"), check_overlap = TRUE) +
+  #scale_size(range = c(4,6)) +
+  scale_size_manual(values = c(2, 4)) +
+  theme_graph(base_family = 'Helvetica') #+
+  #theme(legend.position = "none")
+
+plt <- plot(pltGraph)
+
+#dev.off()
+ggsave(file.path(saved.dir, 'Graph.corr.pvalue.0.05_v3.pdf'), width = 6.5, height = 4.5, dpi = 500, useDingbats=FALSE)
+
+
+#ggplot(plotobject, aes(x=Pos, y=Pval),res=300)
+
+```
+

@@ -1,0 +1,6 @@
+"0","## Provide the dir name(i.e sub dir) that you want to create under main dir:"
+"0","output_dir <- 'Progressor_Allmonths_NewAge'"
+"0",""
+"0","Data_group <- readRDS(file.path(output_dir, ""Data_group.RDS""))"
+"0","Data_combining <- readRDS( file.path(output_dir, ""Data_combining.RDS""))"
+"0","Data_metainfo <- readRDS(file.path(output_dir, ""Data_metainfo.RDS""))"

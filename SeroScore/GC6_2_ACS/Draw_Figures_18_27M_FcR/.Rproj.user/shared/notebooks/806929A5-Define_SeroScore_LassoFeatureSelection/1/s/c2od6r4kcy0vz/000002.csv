@@ -1,0 +1,12 @@
+"0","```r
+interested.features <- c(\"IgA2_Tbad\", \"IgA1_PPD\",\"IgG2_LAM\",\"IgA2_LAM\",
+                         \"totalIgG_LAM\", \"IgM_LAM\",\"IgG1_Ag85\",\"IgM_PPD\",
+                         \"IgM_ESAT6\",\"IgG2_CFP10\",\"totalIgG_Ag85\",\"IgG1_PPD\",\"IgG1_LAM\")
+
+Data_combining_selected <- Data_combining[, interested.features]
+y = Data_group
+y = gsub(\"non-progressor\", 0, y)
+y = gsub(\"progressor\", 1, y)
+
+data.df <- data.frame(y, Data_combining_selected)
+```"

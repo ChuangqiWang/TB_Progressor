@@ -1,0 +1,8 @@
+"0","meta.sero.data <- readRDS('meta.sero.data.RDS')"
+"0","feature.name <- colnames(meta.sero.data)"
+"0","feature.name <- gsub(""/"", ""_"", feature.name)"
+"0","colnames(meta.sero.data) <- feature.name"
+"0","feature.name <- colnames(meta.sero.data)[13:134]"
+"0","meta.sero.data$SubjectID <- factor(meta.sero.data$SubjectID)"
+"0","meta.sero.data$Progressor <- factor(as.character(meta.sero.data$Progressor))"
+"0","meta.sero.data$Group <- factor(meta.sero.data$Group, levels = c('non-progressor', 'progressor'))"

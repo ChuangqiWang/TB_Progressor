@@ -1,0 +1,50 @@
+"0","```r
+results.IgG <- './results_IgG'
+if (!dir.exists(results.IgG)){
+  dir.create((results.IgG))
+}
+totalIgG <- SystemSerogy[1:11]
+Data.matrix.total.IgG <- Data.matrix[, , 1:11]
+options(repr.plot.height = 25, repr.plot.width = 25)
+
+i <- 1
+for(index in 1 : 11){
+  temp.matrix.IgG <- data.frame(Data.matrix.total.IgG[, , index])
+  colnames(temp.matrix.IgG) <- VisitType
+  rownames(temp.matrix.IgG) <- Patient.ID.wGroup$progressors..Sample.ID.
+  
+  myplots <- list()
+  #melt mtcars into long format
+  temp.matrix.IgG.progressor <- temp.matrix.IgG[progressor.index, ]
+  melt.non.progressor <- melt(temp.matrix.IgG.progressor)
+  #add column for car name
+  melt.non.progressor$Patient.ID <- rep(row.names(temp.matrix.IgG.progressor), 5)
+  #view first six rows of melt_mtcars
+  ind <- ggplot(melt.non.progressor, aes(variable, Patient.ID)) +
+  geom_tile(aes(fill = value), colour = \"white\") +
+  scale_fill_gradient(low = \"blue\", high = \"red\") + 
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  labs(x = 'Times', title = 'progressor') +
+  coord_flip()
+  myplots[[1]] <- ind
+  
+  #melt mtcars into long format
+  temp.matrix.IgG.non.progressor <- temp.matrix.IgG[non.progressor.index, ]
+  melt.non.progressor <- melt(temp.matrix.IgG.non.progressor)
+  #add column for car name
+  melt.non.progressor$Patient.ID <- rep(row.names(temp.matrix.IgG.non.progressor), 5)
+  #view first six rows of melt_mtcars
+  ind <- ggplot(melt.non.progressor, aes(variable, Patient.ID)) +
+  geom_tile(aes(fill = value), colour = \"white\") +
+  scale_fill_gradient(low = \"blue\", high = \"red\") + 
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  labs(x = 'Times', title = 'non-progressor') +
+  coord_flip()
+  myplots[[2]] <- ind
+  p <- do.call(\"grid.arrange\", c(myplots, ncol = 1))
+  ggsave(file.path(results.IgG, paste0(totalIgG[index], \".png\", collapse  = \"\")), p, width = 18, height = 4)
+}
+```"
+"1","No id variables; using all as measure variables
+No id variables; using all as measure variables
+"

@@ -1,0 +1,65 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+Quantile Breaks
+```{r}
+library(RColorBrewer)
+library(viridis)
+quantile_breaks <- function(xs, n = 10) {
+  breaks <- quantile(xs, probs = seq(0, 1, length.out = n))
+  breaks[!duplicated(breaks)]
+}
+
+```
+
+```{r}
+library(assertr)
+Post.index <- 4095
+
+#Positive
+l <- rep(list(0:1), 12)
+Post.index <- expand.grid(l)
+Post.index <- Post.index[-1, ]
+#Post.index <- Post.index[c(162, 97, 227), ]
+Post.index <- col_concat(Post.index, sep = "")
+```
+
+Visualization the mean AUC 
+
+```{r}
+## Provide the dir name(i.e sub dir) that you want to create under main dir:
+saved.dir <- 'mean_SeroScore_substract_zscore'
+
+if (!dir.exists(saved.dir)){
+dir.create(saved.dir)
+}
+```
+
+Substraction
+```{r}
+library(pheatmap)
+library(reshape2)
+library(ggplot2)
+folder <- "../Diff_Pro_vs_nonPro_0_9M_risk5score_FcR_woFunctional"
+
+data <- read.csv(file.path(folder, "mean_AUC_SeroScore_FcR.csv"))
+write.csv(data, file.path('.', 'mean_AUC_SeroScore_FcR.csv'))
+
+colnames(data) <- Post.index
+
+data <- melt(data)
+
+
+png(file.path(saved.dir, "SeroScore_seg_v2.png"), width=4500, height=1500, res = 300)
+ggplot(data, aes(x = variable, y = value)) +
+  geom_point(stat='identity') +
+  theme_classic() +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+dev.off()
+
+#Get the index with max meanAUC
+index <- which.max(as.numeric(data$value))
+sel.data <- data[index, ]
+```

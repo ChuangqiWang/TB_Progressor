@@ -1,0 +1,11 @@
+"0","```r
+library(DMwR2)
+#Data a folder to save the results.
+output_dir <- 'Progressor_9months'
+
+Data_group <- readRDS(file.path(output_dir, \"Data_group.RDS\"))
+Data_group <- factor(Data_group, levels = c(\"non-progressor\", \"progressor\"))
+Data_combining <- readRDS(file.path(output_dir, \"Data_combining.RDS\"))
+
+Data_combining <- scale(Data_combining, center = TRUE, scale = TRUE)
+```"

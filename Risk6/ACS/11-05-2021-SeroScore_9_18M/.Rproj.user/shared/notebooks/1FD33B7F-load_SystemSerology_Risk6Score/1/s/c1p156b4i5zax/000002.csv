@@ -1,0 +1,12 @@
+"0","set.seed(1986)"
+"0",""
+"0","library(RColorBrewer)"
+"0","library(viridis)"
+"2","package ‘viridis’ was built under R version 4.0.5"
+"2","Loading required package: viridisLite
+"
+"0","quantile_breaks <- function(xs, n = 10) {"
+"0","  breaks <- quantile(xs, probs = seq(0, 1, length.out = n))"
+"0","  breaks[!duplicated(breaks)]"
+"0","}"
+"0",""

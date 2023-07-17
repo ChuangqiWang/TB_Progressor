@@ -1,0 +1,7 @@
+"0","```r
+
+plt_loadings <- visualize_ropls_loadings(model, options = opts_plot)
+print(plt_loadings)
+filename <- 'OPLS_loading.png'
+ggsave(file = file.path(saved.dir, filename), width = 4.5, height = 3, dpi = 300)
+```"

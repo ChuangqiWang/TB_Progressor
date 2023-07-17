@@ -1,0 +1,20 @@
+"0","```r
+dev.off()
+```"
+"1","null device 
+          1 
+"
+"0","```r
+saveRDS(sacurine.opls, file.path(saved.dir, 'data.sero.opls.lasso.RDS'))
+
+png(file.path(saved.dir, 'opls.scoreing.lasso.png'), width = 1960, height = 1960, res = 300)
+plot(sacurine.opls,
+     typeVc = \"x-score\",
+     parAsColFcVn = Patient.ID.filter.group$progressors.Group)
+```"
+"0","```r
+dev.off()
+```"
+"1","null device 
+          1 
+"

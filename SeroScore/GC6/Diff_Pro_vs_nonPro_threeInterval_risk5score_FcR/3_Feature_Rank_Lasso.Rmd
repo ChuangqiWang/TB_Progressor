@@ -1,0 +1,99 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+
+
+```{r}
+library(DMwR2)
+#Data a folder to save the results.
+output_dir <- 'Progressor_allmonths'
+
+Data_group <- readRDS(file.path(output_dir, "Data_group.RDS"))
+Data_group <- factor(Data_group, levels = c("non-progressor", "progressor"))
+Data_combining <- readRDS(file.path(output_dir, "Data_combining.RDS"))
+
+Data_combining_scale <- Data_combining
+
+
+y = Data_group
+y = gsub("non-progressor", "NO", y)
+y = gsub("progressor", "YES", y)
+
+data.df <- data.frame(y = factor(y), x = Data_combining_scale) #[, selected_features]) 15
+
+```
+
+```{r}
+folder <- './Classification_RF_LASSO'
+
+FeatureName <- colnames(Data_combining_scale)
+FeatureName <- gsub(" ", ".", FeatureName)
+Features.Selection <- array(0, dim = c(dim(Data_combining_scale)[2], 1))
+rownames(Features.Selection) <- FeatureName
+
+for(index in 1 : 100){
+  sel_features <- read.csv(file.path(folder, paste0("sel_features_", toString(index), ".csv")))
+  for(feat.index in sel_features$x){
+    temp.index <- which(feat.index == FeatureName)
+    if(length(temp.index) == 1){
+      Features.Selection[temp.index, 1] <- Features.Selection[temp.index, 1] + 1
+    }else{
+      print(feat.index)
+      print("Something is inappropriate!")
+    }
+  }
+}
+
+library(ggplot2)
+data.df <- data.frame(FeatureName = FeatureName, Freq = Features.Selection)
+
+data.df$FeatureName <- factor(data.df$FeatureName,  levels = data.df$FeatureName[order(data.df$Freq, decreasing = TRUE)]) # Factor levels in increasing order
+
+
+ggplot(data.df, aes(x = FeatureName, y = Freq)) +
+  geom_bar(stat="identity") +
+  theme_classic() +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+
+saveRDS(data.df, file.path(folder, "Features_Freq.RDS"))
+
+ggsave(file.path(folder, "Features_Freq.png"), width = 12, height = 4, dpi = 300)
+```
+
+```{r}
+folder <- './Classification_RF_LASSO_woRisk6'
+
+FeatureName <- colnames(Data_combining_scale)
+FeatureName <- gsub(" ", ".", FeatureName)
+Features.Selection <- array(0, dim = c(dim(Data_combining_scale)[2], 1))
+rownames(Features.Selection) <- FeatureName
+
+for(index in 1 : 100){
+  sel_features <- read.csv(file.path(folder, paste0("sel_features_", toString(index), ".csv")))
+  for(feat.index in sel_features$x){
+    temp.index <- which(feat.index == FeatureName)
+    if(length(temp.index) == 1){
+      Features.Selection[temp.index, 1] <- Features.Selection[temp.index, 1] + 1
+    }else{
+      print(feat.index)
+      print("Something is inappropriate!")
+    }
+  }
+}
+
+library(ggplot2)
+data.df <- data.frame(FeatureName = FeatureName, Freq = Features.Selection)
+
+data.df$FeatureName <- factor(data.df$FeatureName,  levels = data.df$FeatureName[order(data.df$Freq, decreasing = TRUE)]) # Factor levels in increasing order
+
+
+ggplot(data.df, aes(x = FeatureName, y = Freq)) +
+  geom_bar(stat="identity") +
+  theme_classic() +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+
+saveRDS(data.df, file.path(folder, "Features_Freq_woRisk6.RDS"))
+ggsave(file.path(folder, "Features_Freq_woRisk6.png"), width = 12, height = 4, dpi = 300)
+```

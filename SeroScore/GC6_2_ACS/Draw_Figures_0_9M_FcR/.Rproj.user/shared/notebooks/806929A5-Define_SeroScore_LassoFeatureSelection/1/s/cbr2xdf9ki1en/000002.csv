@@ -1,0 +1,12 @@
+"0","```r
+FcR <- interested.features[1:13]
+
+n <- length(FcR)
+l <- rep(list(0:1), n)
+
+FcR.index <- expand.grid(l)
+FcR.index <- FcR.index[-1, ]
+FcR.Data <- Data_combining_selected[, FcR]
+colnames(FcR.Data) <- FcR
+saveRDS(FcR.Data, file.path(saved.dir, \"FcR.Data.RDS\"))
+```"

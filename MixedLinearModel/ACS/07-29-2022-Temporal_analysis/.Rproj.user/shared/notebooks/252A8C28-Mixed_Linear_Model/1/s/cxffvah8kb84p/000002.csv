@@ -1,0 +1,12 @@
+"0","```r
+meta.sero.data.log2.zscore <- meta.sero.data
+# RCA/SNA features are located from 111-122
+for(index in 13:92 ){
+  meta.sero.data.log2.zscore[, index] <- log2(meta.sero.data[, index] + 1)
+}
+
+for(index in 99:134 ){
+  meta.sero.data.log2.zscore[, index] <- log2(meta.sero.data[, index] + 1)
+}
+meta.sero.data.log2.zscore[, 13:134] <- scale(meta.sero.data.log2.zscore[, 13:134], center = TRUE, scale = TRUE)
+```"

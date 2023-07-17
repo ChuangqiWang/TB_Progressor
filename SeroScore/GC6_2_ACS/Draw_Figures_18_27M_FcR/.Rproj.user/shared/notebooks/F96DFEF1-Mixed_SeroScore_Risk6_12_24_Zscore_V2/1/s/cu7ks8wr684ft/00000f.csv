@@ -1,0 +1,3 @@
+"0","#Visualizing the heatmap "
+"0","library(pheatmap)"
+"0","data.frame(seroScore = seroScore.interested, Risk6 = Data_combining[, 'Risk6'], FCR3B_PPD = Data_combining[, 'FcgR3B_PPD'], group = Data_group)"

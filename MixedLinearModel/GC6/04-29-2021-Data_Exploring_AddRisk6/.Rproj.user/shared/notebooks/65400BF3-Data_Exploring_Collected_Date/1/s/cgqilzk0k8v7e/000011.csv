@@ -1,0 +1,1 @@
+"0","ggsave(file.path(results.folder, ""Sample.Frequency.png""), width = 12, height = 3)"

@@ -1,0 +1,7 @@
+"0","```r
+#Create a folder to save the results.
+saved.dir <- './SeroScore_FcR_Lasso'
+if (!dir.exists(saved.dir)){
+  dir.create((saved.dir))
+}
+```"

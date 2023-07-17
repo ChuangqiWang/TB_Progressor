@@ -1,0 +1,220 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+```{r}
+library(RColorBrewer)
+library(viridis)
+quantile_breaks <- function(xs, n = 10) {
+  breaks <- quantile(xs, probs = seq(0, 1, length.out = n))
+  breaks[!duplicated(breaks)]
+}
+
+options <- list(alpha = 1,
+                size = 1.5,
+                stroke = 0.5,
+                shape = 21
+)
+
+meta_colors <- list(
+  "group" = c(
+    "progressor" = "#AD07E3",
+    "non-progressor" = "#238b45"
+    ),
+  "group1" = c(
+    "progressor" = "#AD07E3",
+    "non-progressor" = "#238b45"
+    )
+)
+
+meta_colors <- list(
+  "group" = c(
+    "progressor" = "#fe9300",
+    "non-progressor" = "#009093"
+    ),
+  "group1" = c(
+    "progressor" = "#fe9300",
+    "non-progressor" = "#009093"
+    )
+)
+```
+
+Mixed effect of SeroScore & Risk6 Score
+```{r}
+#Load the meanAUC
+folder <- "../GC6_UnifiedScore_inACS_18_27M"
+data <- read.csv(file.path(folder, "mean_AUC_SeroScore_FcR.csv"))
+
+#Get the index with max meanAUC
+index <- which.max(as.numeric(data))
+sel.data <- data[index]
+```
+
+
+```{r}
+#Load the seroScore
+folder <- "../GC6_UnifiedScore_inACS_18_27M/SeroScore_FcR_Lasso"
+seroScore <- readRDS(file.path(folder, 'SeroScore.RDS'))
+seroScore.interested <- seroScore[, index]
+
+#Load the datatype.
+#Data a folder to save the results.
+output_dir <- '../../7_Experiments_11-05-2021/12-15-2022-Diff_Pro_vs_nonPro_18_27M_risk5score_FcR_woFunctional/Progressor_18_27months'
+
+Data_group <- readRDS(file.path(output_dir, "Data_group.RDS"))
+Data_group <- factor(Data_group, levels = c("non-progressor", "progressor"))
+Data_combining <- readRDS(file.path(output_dir, "Data_combining.RDS"))
+
+DataScore <- data.frame(seroScore = seroScore.interested, Risk6 = Data_combining[, 'Risk6'], FCR3B_PPD = Data_combining[, 'FcgR3B_PPD'], group = Data_group)
+```
+
+
+```{r}
+#Create a folder to save the results.
+saved.dir <- './mean_SeroScore_substract_zscore_v2'
+if (!dir.exists(saved.dir)){
+  dir.create((saved.dir))
+}
+```
+
+Visualization
+```{r}
+library(ggplot2)
+library(ggrepel)
+ggplot(data = DataScore[sample(nrow(DataScore)),]) +
+  geom_point(
+    mapping = aes_string(x = "seroScore", y = "Risk6", fill = "group"),
+    color = "black",
+                        size = options$size,
+                        alpha = options$alpha,
+                        stroke = options$stroke,
+                        shape = options$shape,
+                        show.legend = TRUE) +
+  scale_fill_manual(values = meta_colors$group, name = "group") +
+  labs(x = "seroScore",y = "Risk6") +
+  theme_classic(base_size = 8) +
+  theme( legend.text = element_text(face = "bold", color = "black"),
+              axis.title = element_text(face = "bold", color = "black"),
+              axis.text = element_text(face = "bold", color = "black")) +
+  theme(legend.position = "none",
+                   aspect.ratio = 1)#,
+                   #axis.text = ggplot2::element_text(color = "black"))
+filename <- 'Sero_0_9M_group.pdf'
+ggsave(file = file.path(saved.dir, filename), width = 3, height = 3, dpi = 300)
+filename <- 'Sero_0_9M_group.png'
+ggsave(file = file.path(saved.dir, filename), width = 3, height = 3, dpi = 300)
+```
+
+```{r}
+library(ggplot2)
+library(ggExtra)
+library(cowplot)
+
+pmain <- ggplot(data = DataScore[sample(nrow(DataScore)),]) +
+  geom_point(
+    mapping = aes_string(x = "seroScore", y = "Risk6", fill = "group"),
+    color = "black",
+                        size = options$size,
+                        alpha = options$alpha,
+                        stroke = options$stroke,
+                        shape = options$shape,
+                        show.legend = TRUE) +
+  scale_fill_manual(values = meta_colors$group, name = "group") +
+  labs(x = "seroScore",y = "Risk6") +
+  theme_classic(base_size = 8) +
+  theme( legend.text = element_text(face = "bold", color = "black"),
+              axis.title = element_text(face = "bold", color = "black"),
+              axis.text = element_text(face = "bold", color = "black")) #+
+  #theme(legend.position = "none",
+  #                 aspect.ratio = 1)#,
+                   #axis.text = ggplot2::element_text(color = "black"))
+
+xdens <- axis_canvas(pmain, axis = "x")+
+  geom_density(data = DataScore[sample(nrow(DataScore)),], aes(x = seroScore, fill = group),
+              alpha = 0.7, size = 0.2)+
+  scale_fill_manual(values = meta_colors$group, name = "group")
+
+ydens <- axis_canvas(pmain, axis = "y", coord_flip = TRUE)+
+  geom_density(data = DataScore[sample(nrow(DataScore)),], aes(x = Risk6, fill = group),
+                alpha = 0.7, size = 0.2)+
+  coord_flip()+
+  scale_fill_manual(values = meta_colors$group, name = "group")
+
+p1 <- insert_xaxis_grob(pmain, xdens, grid::unit(.2, "null"), position = "top")
+p2<- insert_yaxis_grob(p1, ydens, grid::unit(.2, "null"), position = "right")
+ggdraw(p2)
+
+filename <- 'Sero_group_Marginal.pdf'
+ggsave(file = file.path(saved.dir, filename), width = 5, height = 3, dpi = 300)
+filename <- 'Sero_group_Marginal.png'
+ggsave(file = file.path(saved.dir, filename), width = 5, height = 3, dpi = 300)
+```
+
+```{r}
+library(pheatmap)
+Features <- c("totalIgG_LAM", "totalIgG_ESAT6",  "IgG2_PPD", "IgG3_CFP10",  "IgG3_ESAT6",  "IgA1_PPD",  "IgA1_Hspx",  "IgM_Ag85")
+Combined.Features <- c(Features, "'Risk6'")
+Selected.Features <- Data_combining[, Features]
+Combined.Dataset <- cbind(Selected.Features, seroScore = seroScore.interested)
+
+saveRDS(Combined.Dataset, file.path(saved.dir, "Combined.Dataset.RDS"))
+saveRDS(DataScore, file.path(saved.dir, "DataScore.RDS"))
+```
+
+```{r}
+#Visualizing the heatmap 
+library(pheatmap)
+data.frame(seroScore = seroScore.interested, Risk6 = Data_combining[, 'Risk6'], FCR3B_PPD = Data_combining[, 'FcgR3B_PPD'], group = Data_group)
+
+ordered_index <- order(DataScore$seroScore, DataScore$Risk6, DataScore$group)
+annotation_row_ordered <- DataScore[ordered_index, c("seroScore", "Risk6", "group")]
+
+rownames(Combined.Dataset) <- rownames(DataScore)
+
+mat_breaks <- quantile_breaks(na.omit(unlist(Combined.Dataset[, 1:8])), n = 100)
+
+png(file.path(saved.dir, "selected.features.png"), width=1000, height=1500, res = 300)
+pheatmap(
+  mat = Combined.Dataset[ordered_index, 1:8],
+  color = colorRampPalette(rev(brewer.pal(n = 8, name = "RdBu")))(length(mat_breaks) - 1),
+  breaks = mat_breaks,
+  border_color = NA,
+  #color = colorRampPalette(rev(brewer.pal(n = 8, name = \RdYlBu\)))(6),
+  show_rownames = FALSE,
+  show_colnames = TRUE,
+  cluster_rows = FALSE,
+  cluster_cols = TRUE,
+  annotation_row = annotation_row_ordered,
+  annotation_colors = meta_colors,
+  fontsize = 5,
+  fontsize_col = 6,
+  na_col = "grey",
+  scale = "none"
+)
+dev.off()
+```
+
+
+```{r}
+mat_breaks <- quantile_breaks(na.omit(unlist(scale(Combined.Dataset[ordered_index, 1:8], center = TRUE, scale = TRUE))), n = 100)
+png(file.path(saved.dir, "selected.features.scaled.png"), width=1000, height=1500, res = 300)
+pheatmap(
+  mat = scale(Combined.Dataset[ordered_index, 1:8], center = TRUE, scale = TRUE),
+  color = colorRampPalette(rev(brewer.pal(n = 8, name = "RdBu")))(length(mat_breaks) - 1),
+  breaks = mat_breaks,
+  border_color = NA,
+  #color = colorRampPalette(rev(brewer.pal(n = 8, name = \RdYlBu\)))(6),
+  show_rownames = FALSE,
+  show_colnames = TRUE,
+  cluster_rows = FALSE,
+  cluster_cols = TRUE,
+  annotation_row = annotation_row_ordered,
+  annotation_colors = meta_colors,
+  fontsize = 5,
+  fontsize_col = 6,
+  na_col = "grey",
+  scale = "none"
+)
+dev.off()
+
+```

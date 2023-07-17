@@ -1,0 +1,12 @@
+"0","```r
+
+# set additional options required to color code enrichment in the bar plot of the loadings
+opts_plot$X <- X
+opts_plot$y <- y
+opts_plot$LV_ind <- 2
+opts_plot$mark_enrichment <- TRUE
+plt_loadings_bar <- visualize_ropls_VIP_bar(model, options = opts_plot)
+print(plt_loadings_bar)
+filename <- 'OPLS_loading_bar_VIP.png'
+ggsave(file = file.path(saved.dir, filename), width = 4.5, height = 6, dpi = 300)
+```"

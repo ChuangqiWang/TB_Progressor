@@ -1,0 +1,36 @@
+"0","```r
+library(pheatmap)
+
+annotation_row <- data.frame(VisitType = meta.sero.data$VisitType, group = meta.sero.data$Group)
+rownames(annotation_row) <- rownames(meta.sero.data)
+
+ordered_index <- order(annotation_row$group, annotation_row$VisitType)
+annotation_row_ordered <- annotation_row[ordered_index, ]
+
+data.sero.ordered <- meta.sero.data[ordered_index, 13:134]
+
+mat_breaks <- quantile_breaks(na.omit(unlist(data.sero.ordered)), n = 100)
+png(file.path(saved.dic, \"heatmap.png\"), width=3560, height=1940, res = 300)
+pheatmap(
+    mat = data.sero.ordered,
+   border_color = NA,
+    color = colorRampPalette(rev(brewer.pal(n = 8, name = \"RdYlBu\")))(length(mat_breaks) - 1),
+    #color = inferno(length(mat_breaks) - 1),
+    breaks = mat_breaks,
+    show_rownames = FALSE,
+    show_colnames = TRUE,
+    cluster_rows = FALSE,
+    cluster_cols = TRUE,
+    annotation_row = annotation_row_ordered,
+    #annotation_colors = meta_colors,
+    fontsize = 6,
+    fontsize_col = 5,
+    fontsize_row = 5,
+    scale = \"none\",
+    main  = \"Serology Data with Quantile Color Scale\"
+  )
+dev.off()
+```"
+"1","null device 
+          1 
+"

@@ -1,0 +1,134 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+meta_colors <- list(
+  "group" = c(
+    "progressor" = "#AD07E3",
+    "non-progressor" = "#238b45"
+    ),
+  "group1" = c(
+    "progressor" = "#AD07E3",
+    "non-progressor" = "#238b45"
+    )
+)
+```
+
+
+Quantile Breaks
+```{r}
+set.seed(1986)
+
+library(RColorBrewer)
+library(viridis)
+quantile_breaks <- function(xs, n = 10) {
+  breaks <- quantile(xs, probs = seq(0, 1, length.out = n))
+  breaks[!duplicated(breaks)]
+}
+
+```
+
+```{r}
+folder <- "../2021-10-25-Extract_Dataset_0-9M"
+
+Progressor <- readRDS(file.path(paste0(folder, "/Progressor_9months_v2"), "logscale.TB.Progressor.RDS"))
+
+NonProgressor <- readRDS(file.path(paste0(folder, "/nonprogressors"), "nonprogressor.Data.RDS"))
+nonProgressor.metadata <- readRDS(file.path(paste0(folder, "/nonprogressors"), "nonprogressor.meta.RDS"))
+
+
+#NonProgressor.Avg <- readRDS(file.path(paste0(folder, "/nonprogressors"), "nonprogressor.Avg.RDS"))
+nonProgressor.metadata.Avg <- readRDS(file.path(paste0(folder, "/nonprogressors"), "nonprogressor.meta.Avg.RDS"))
+Syssero.Name <- colnames(NonProgressor)
+
+all(colnames(Progressor) == colnames(NonProgressor))
+```
+
+
+```{r}
+## Provide the dir name(i.e sub dir) that you want to create under main dir:
+output_dir <- 'Progressor_0_9months'
+
+if (!dir.exists(output_dir)){
+dir.create(output_dir)
+}
+```
+
+```{r}
+NonProgressor.selected.index <- c()
+
+for(index in 1 : dim(nonProgressor.metadata.Avg)[1]){
+  temp.ID <- as.character(nonProgressor.metadata.Avg[index, ]$ID)
+  rows.index <- which(as.character(nonProgressor.metadata$ID) == temp.ID)
+  selected.idx <- sample(rows.index,1)
+  NonProgressor.selected.index <- c(NonProgressor.selected.index, selected.idx)
+}
+
+
+NonProgressor.selected <- NonProgressor[NonProgressor.selected.index, ]
+# 
+# temp.index <- which(apply(NonProgressor.selected, 1, function(x) all(is.na(x))))
+# NonProgressor.selected <- NonProgressor.selected[-temp.index, ]
+```
+
+```{r}
+all(colnames(NonProgressor.selected) == colnames(Progressor))
+
+Data_combining <- rbind(Progressor, NonProgressor.selected)
+Data_group <- c(rep("progressor", dim(Progressor)[1]), rep("non-progressor", dim(NonProgressor.selected)[1]))
+```
+
+
+```{r}
+# temp.index <- which(apply(Data_combining, 1, function(x) any(is.na(x))))
+# Data_group <- Data_group[-temp.index]
+# Data_combining <- Data_combining[-temp.index, ]
+saveRDS(Data_group, file.path(output_dir, "Data_group.RDS"))
+saveRDS(Data_combining, file.path(output_dir, "Data_combining.RDS"))
+
+write.csv(Data_group, file.path(output_dir, "Data_group.csv"))
+write.csv(Data_combining, file.path(output_dir, "Data_combining.csv"))
+```
+
+
+```{r}
+library(pheatmap)
+
+annotation_row <- data.frame(group1 = Data_group, group = Data_group)
+rownames(annotation_row) <- rownames(Data_combining)
+
+ordered_index <- order(annotation_row$group, annotation_row$group1)
+annotation_row_ordered <- annotation_row[ordered_index, ]
+
+data.sero.ordered <- scale(Data_combining[ordered_index, ], center = TRUE, scale = TRUE)
+
+mat_breaks <- quantile_breaks(na.omit(unlist(data.sero.ordered)), n = 100)
+png(file.path(output_dir, "heatmap.scaled.png"), width=3560, height=1940, res = 300)
+pheatmap(
+    mat = data.sero.ordered,
+   border_color = NA,
+    color = colorRampPalette(rev(brewer.pal(n = 8, name = "RdYlBu")))(length(mat_breaks) - 1),
+    #color = inferno(length(mat_breaks) - 1),
+    breaks = mat_breaks,
+    show_rownames = FALSE,
+    show_colnames = TRUE,
+    cluster_rows = FALSE,
+    cluster_cols = TRUE,
+    annotation_row = annotation_row_ordered,
+    annotation_colors = meta_colors,
+    fontsize = 6,
+    fontsize_col = 5,
+    fontsize_row = 5,
+    scale = "none",
+    main  = "Serology Data with Quantile Color Scale"
+  )
+dev.off()
+
+```

@@ -1,0 +1,8 @@
+"0","library(pheatmap)"
+"0","Features <- c(""IgG_LAM"", ""IgG_ESAT6"",  ""IgG2_PPD"", ""IgG3_CFP10"",  ""IgG3_ESAT6"",  ""IgA1_PPD"",  ""IgA1_HspX"",  ""IgM_Ag85"")"
+"0","Combined.Features <- c(Features, ""'Risk6'"")"
+"0","Selected.Features <- Data_combining[, Features]"
+"0","Combined.Dataset <- cbind(Selected.Features, seroScore = seroScore.interested)"
+"0",""
+"0","saveRDS(Combined.Dataset, file.path(saved.dir, ""Combined.Dataset.RDS""))"
+"0","saveRDS(DataScore, file.path(saved.dir, ""DataScore.RDS""))"

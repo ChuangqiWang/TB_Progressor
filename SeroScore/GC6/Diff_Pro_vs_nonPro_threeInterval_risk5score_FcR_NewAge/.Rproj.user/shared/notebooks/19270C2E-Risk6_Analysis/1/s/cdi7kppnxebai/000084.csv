@@ -1,0 +1,78 @@
+"0","library(ggplot2)"
+"0","library(dplyr)"
+"0","library(hrbrthemes)"
+"0","library(viridis)"
+"0",""
+"0","ggplot(Data_metainfo, aes(x = group, y = Risk6, color = group)) +"
+"0","  geom_violin(width=1.4) +"
+"0","  geom_boxplot(width=0.1, color=""grey"", alpha=0.2) +"
+"0","  geom_jitter(shape=16, position=position_jitter(0.2)) +"
+"0","  scale_color_manual(values = meta_colors$group) +"
+"0","  theme_ipsum()"
+"2","Warning:"
+"2"," Removed 131 rows containing non-finite values (stat_ydensity).
+"
+"2","Warning:"
+"2"," Removed 131 rows containing non-finite values (stat_boxplot).
+"
+"2","Warning:"
+"2"," position_dodge requires non-overlapping x intervals
+"
+"2","Warning:"
+"2"," Removed 131 rows containing missing values (geom_point).
+"
+"2","Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y,  :"
+"2","
+ "
+"2"," font family not found in Windows font database
+"
+"2","Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y,  :"
+"2","
+ "
+"2"," font family not found in Windows font database
+"
+"2","Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y,  :"
+"2","
+ "
+"2"," font family not found in Windows font database
+"
+"2","Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y,  :"
+"2","
+ "
+"2"," font family not found in Windows font database
+"
+"2","Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y,  :"
+"2","
+ "
+"2"," font family not found in Windows font database
+"
+"2","Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y,  :"
+"2","
+ "
+"2"," font family not found in Windows font database
+"
+"2","Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y,  :"
+"2","
+ "
+"2"," font family not found in Windows font database
+"
+"2","Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y,  :"
+"2","
+ "
+"2"," font family not found in Windows font database
+"
+"2","Warning in grid.Call.graphics(C_text, as.graphicsAnnot(x$label), x$x, x$y,  :"
+"2","
+ "
+"2"," font family not found in Windows font database
+"
+"2","Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y,  :"
+"2","
+ "
+"2"," font family not found in Windows font database
+"
+"2","Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y,  :"
+"2","
+ "
+"2"," font family not found in Windows font database
+"

@@ -1,0 +1,8 @@
+"0","default_threshold = 0.5"
+"0",""
+"0","#Create a folder to save the results."
+"0","saved.dir <- paste0('./Correlation_visualization_', toString(default_threshold))"
+"0","if (!dir.exists(saved.dir)){"
+"0","  dir.create((saved.dir))"
+"0","}"
+"0",""

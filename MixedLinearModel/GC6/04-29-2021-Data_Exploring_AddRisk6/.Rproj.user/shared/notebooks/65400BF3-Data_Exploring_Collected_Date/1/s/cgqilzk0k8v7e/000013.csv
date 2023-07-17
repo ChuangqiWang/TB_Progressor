@@ -1,0 +1,7 @@
+"0",""
+"0","df.table <- table(ID.df$group)"
+"0","df.group <- as.data.frame(df.table)"
+"0","ggplot(data=df.group, aes(x = Var1, y = Freq)) +"
+"0","  geom_bar(stat=""identity"") +"
+"0","  geom_text(aes(label=Freq), vjust=1.6, color=""white"", size=5.5)+"
+"0","  theme_classic(base_size = 10)"

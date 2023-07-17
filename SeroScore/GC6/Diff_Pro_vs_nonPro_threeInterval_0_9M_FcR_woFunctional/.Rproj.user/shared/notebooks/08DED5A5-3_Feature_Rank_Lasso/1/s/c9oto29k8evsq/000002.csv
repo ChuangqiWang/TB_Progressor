@@ -1,0 +1,19 @@
+"0","```r
+library(DMwR2)
+#Data a folder to save the results.
+output_dir <- 'Progressor_allmonths'
+
+Data_group <- readRDS(file.path(output_dir, \"Data_group.RDS\"))
+Data_group <- factor(Data_group, levels = c(\"non-progressor\", \"progressor\"))
+Data_combining <- readRDS(file.path(output_dir, \"Data_combining.RDS\"))
+
+Data_combining_scale <- Data_combining
+
+
+y = Data_group
+y = gsub(\"non-progressor\", \"NO\", y)
+y = gsub(\"progressor\", \"YES\", y)
+
+data.df <- data.frame(y = factor(y), x = Data_combining_scale) #[, selected_features]) 15
+
+```"

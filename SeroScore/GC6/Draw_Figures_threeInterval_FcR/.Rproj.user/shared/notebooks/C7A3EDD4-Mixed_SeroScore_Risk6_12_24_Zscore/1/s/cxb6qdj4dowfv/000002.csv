@@ -1,0 +1,32 @@
+"0","```r
+library(ggplot2)
+```"
+"1","Warning: package â€˜ggplot2â€™ was built under R version 4.1.3
+"
+"0","```r
+library(ggrepel)
+ggplot(data = DataScore[sample(nrow(DataScore)),]) +
+  geom_point(
+    mapping = aes_string(x = \"seroScore\", y = \"Risk6\", fill = \"group\"),
+    color = \"black\",
+                        size = options$size,
+                        alpha = options$alpha,
+                        stroke = options$stroke,
+                        shape = options$shape,
+                        show.legend = TRUE) +
+  scale_fill_manual(values = meta_colors$group, name = \"group\") +
+  labs(x = \"seroScore\",y = \"Risk6\") +
+  theme_classic(base_size = 8) +
+  theme( legend.text = element_text(face = \"bold\", color = \"black\"),
+              axis.title = element_text(face = \"bold\", color = \"black\"),
+              axis.text = element_text(face = \"bold\", color = \"black\")) +
+  theme(legend.position = \"none\",
+                   aspect.ratio = 1)#,
+                   #axis.text = ggplot2::element_text(color = \"black\"))
+filename <- 'Sero_9_18M_group_v1.pdf'
+ggsave(file = file.path(saved.dir, filename), width = 3, height = 3, dpi = 300)
+```"
+"0","```r
+filename <- 'Sero_9_18M_group_v1.png'
+ggsave(file = file.path(saved.dir, filename), width = 3, height = 3, dpi = 300)
+```"

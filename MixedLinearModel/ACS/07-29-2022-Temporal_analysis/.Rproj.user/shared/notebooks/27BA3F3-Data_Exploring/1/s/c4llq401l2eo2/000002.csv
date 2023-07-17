@@ -1,0 +1,15 @@
+"0","```r
+library(\"readxl\")
+
+```"
+"1","package ã¤¼ã¸±readxlã¤¼ã¸² was built under R version 3.6.3
+"
+"0","```r
+folder.directory <- '../../0_Frozen_Dataset/reslidesfromprogressors'
+filename <- '20200511_ACS_summary_data_for_Chuangqi_with_plate.xlsx'
+
+# Before reading data, we will return the names of the sheets for later use:
+sheets.name <- excel_sheets(file.path(folder.directory, filename))
+# xlsx files
+progressors <- read_excel(file.path(folder.directory, filename), sheet = \"progressors\")
+```"

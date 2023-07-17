@@ -1,0 +1,27 @@
+{
+    "id": "8CC39C11",
+    "path": "C:/0_IMPAcTB_Alter/7_Experiments_11-05-2021/12-11-2022-Draw_Figures_threeInterval_risk5score_FcR/Visualization_SeroScore_Substract_Zscore.Rmd",
+    "project_path": "Visualization_SeroScore_Substract_Zscore.Rmd",
+    "type": "r_markdown",
+    "hash": "2470866982",
+    "contents": "",
+    "dirty": false,
+    "created": 1675964611384.0,
+    "source_on_save": false,
+    "relative_order": 1,
+    "properties": {
+        "chunk_output_type": "inline",
+        "source_window_id": "",
+        "Source": "Source",
+        "cursorPosition": "46,41",
+        "scrollLine": "31"
+    },
+    "folds": "",
+    "lastKnownWriteTime": 1657380643,
+    "encoding": "UTF-8",
+    "collab_server": "",
+    "source_window": "",
+    "last_content_update": 1657380643,
+    "read_only": false,
+    "read_only_alternatives": []
+}

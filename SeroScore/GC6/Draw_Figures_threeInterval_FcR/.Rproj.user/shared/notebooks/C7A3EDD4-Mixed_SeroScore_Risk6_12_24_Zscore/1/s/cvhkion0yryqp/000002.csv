@@ -1,0 +1,10 @@
+"0","```r
+library(pheatmap)
+Features <- c(\"IgG1_LAM\", \"IgG2_PPD\", \"IgG2_ESAT6\", \"IgA1_PPD\", \"IgA2_PPD\", \"IgM_PPD\", \"FcgR3B_PPD\")
+Combined.Features <- c(Features, \"'Risk6'\")
+Selected.Features <- Data_combining[, Features]
+Combined.Dataset <- cbind(Selected.Features, seroScore = seroScore.interested)
+
+saveRDS(Combined.Dataset, file.path(saved.dir, \"Combined.Dataset.RDS\"))
+saveRDS(DataScore, file.path(saved.dir, \"DataScore.RDS\"))
+```"

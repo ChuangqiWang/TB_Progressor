@@ -1,0 +1,25 @@
+"0","```r
+seroScore <- data.frame(matrix(NA, nrow = dim(Data_combining)[1], ncol = dim(FcR.index)[1]))
+curr.index <- 1
+for(index.p in 1 : dim(FcR.index)[1]){
+    #for(index.n in 1 : dim(Neg.index)[1]){
+      #For positive parts.
+      temp.FcR.index <- FcR.index[index.p, ]
+      temp.FcR.index <- which(temp.FcR.index == 1)
+      if(length(temp.FcR.index) > 1){
+        Temp.pos <- rowSums(FcR.Data[, temp.FcR.index]) #Sum each rows.
+      }else{
+        Temp.pos <- FcR.Data[, temp.FcR.index]
+      }
+    
+    
+      #Calculate the difference.
+      Temp.value <- Temp.pos
+      seroScore[, curr.index] <- Temp.value
+      curr.index <- curr.index + 1
+    #}
+}
+
+saveRDS(seroScore, file.path(saved.dir, 'SeroScore.RDS'))
+write.csv(seroScore, file.path(saved.dir, \"SeroScore.csv\"))
+```"

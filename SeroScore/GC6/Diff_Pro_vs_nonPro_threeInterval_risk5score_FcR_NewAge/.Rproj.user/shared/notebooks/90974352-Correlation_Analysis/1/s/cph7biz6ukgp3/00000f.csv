@@ -1,0 +1,61 @@
+"0","library(RColorBrewer)"
+"2","Warning:"
+"2"," package ‘RColorBrewer’ was built under R version 4.1.3
+"
+"0","library(backports)"
+"0","library(Hmisc)"
+"2","Warning:"
+"2"," package ‘Hmisc’ was built under R version 4.1.3
+"
+"2","Loading required package: lattice
+"
+"2","Loading required package: survival
+"
+"2","Loading required package: Formula
+"
+"2","Registered S3 method overwritten by 'htmlwidgets':
+  method           from         
+  print.htmlwidget tools:rstudio
+"
+"2","Registered S3 method overwritten by 'data.table':
+  method           from
+  print.data.table     
+"
+"2","
+Attaching package: ‘Hmisc’
+
+"
+"2","The following objects are masked from ‘package:dplyr’:
+
+    src, summarize
+
+"
+"2","The following objects are masked from ‘package:base’:
+
+    format.pval, units
+
+"
+"0","library(corrplot)"
+"2","Warning:"
+"2"," package ‘corrplot’ was built under R version 4.1.3
+"
+"2","corrplot 0.92 loaded
+"
+"0","library(pheatmap)"
+"0","library(binaryLogic)"
+"2","
+Attaching package: ‘binaryLogic’
+
+"
+"2","The following object is masked from ‘package:ggpubr’:
+
+    rotate
+
+"
+"0","corrMat <- rcorr(Data_combining_scale, type = ""spearman"")"
+"0","# heatmap for full correlation matrix"
+"0",""
+"0","png(file.path(saved.dir, ""corrMat.coeff.v2.png""), width = 3860, height = 3860, res = 300)"
+"0","pheatmap(corrMat$r, cluster_rows = TRUE, cluster_cols = TRUE,       "
+"0","         color = rev(colorRampPalette(brewer.pal(n = 10, name = ""RdBu""))(100)),"
+"0","         breaks = seq(-1,1, length = 100)) # fix color scale to make interpretation easier"

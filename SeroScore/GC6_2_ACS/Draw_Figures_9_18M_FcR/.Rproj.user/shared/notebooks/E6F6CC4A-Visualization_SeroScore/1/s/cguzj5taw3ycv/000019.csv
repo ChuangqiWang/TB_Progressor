@@ -1,0 +1,30 @@
+"0","#Remove all the columns and rows with all NA.
+#3) Removing all the features including NA.
+Temp.index <- which(apply(data.matrix, 2, function(x) all(is.na(x))))
+data.matrix <- data.matrix[, -Temp.index]
+Temp.index <- which(apply(data.matrix, 1, function(x) all(is.na(x))))
+data.matrix <- data.matrix[-Temp.index, ]
+mat_breaks <- quantile_breaks(na.omit(unlist(data.matrix)), n = 50)
+png(file.path(saved.dir, ""SeroScore_seg_larger0.75_clean.png""), width=1000, height=600, res = 300)
+pheatmap(
+  mat = as.matrix(t(data.matrix)),
+  color = colorRampPalette((brewer.pal(n = 8, name = ""OrRd"")))(50),
+  #breaks = mat_breaks,
+  border_color = NA,
+  #color = colorRampPalette(rev(brewer.pal(n = 8, name = \RdYlBu\)))(6),
+  show_rownames = TRUE,
+  show_colnames = TRUE,
+  cluster_rows = FALSE,
+  cluster_cols = FALSE,
+  fontsize = 5,
+  fontsize_col = 5,
+  scale = ""none""
+)
+dev.off()
+"
+"1","null device "
+"1","
+"
+"1","          1 "
+"1","
+"

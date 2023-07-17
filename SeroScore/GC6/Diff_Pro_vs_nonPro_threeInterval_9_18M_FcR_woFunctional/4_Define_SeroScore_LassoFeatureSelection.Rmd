@@ -1,0 +1,113 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+meta_colors <- list(
+  "group" = c(
+    "NA" = "gray", 
+    "progressor" = "#AD07E3",
+    "non-progressor" = "#238b45"
+    )
+)
+``` 
+
+
+
+```{r}
+library(DMwR2)
+#Data a folder to save the results.
+output_dir <- 'Progressor_9_18months'
+
+Data_group <- readRDS(file.path(output_dir, "Data_group.RDS"))
+Data_group <- factor(Data_group, levels = c("non-progressor", "progressor"))
+Data_combining <- readRDS(file.path(output_dir, "Data_combining.RDS"))
+
+Data_combining <- scale(Data_combining, center = TRUE, scale = TRUE)
+```
+
+```{r}
+library(dplyr)
+# folder <- './Classification_RF_LASSO_woRisk6'
+# data.df <- readRDS(file.path(folder, "Features_Freq_woRisk6.RDS"))
+# 
+# temp.df <- top_n(data.df, 12, Freq)
+# interested.features <- as.character(temp.df$FeatureName)
+
+
+interested.features <- c("IgG_LAM", "IgG_ESAT6", "IgG2_PPD",  "IgG3_CFP10", "IgG3_ESAT6", 
+                         "IgA1_PPD", "IgA1_HspX", "IgM_Ag85")
+
+Data_combining_selected <- Data_combining[, interested.features]
+y = Data_group
+y = gsub("non-progressor", 0, y)
+y = gsub("progressor", 1, y)
+
+data.df <- data.frame(y, Data_combining_selected)
+```
+
+
+```{r}
+#Create a folder to save the results.
+saved.dir <- './SeroScore_FcR_Lasso'
+if (!dir.exists(saved.dir)){
+  dir.create((saved.dir))
+}
+```
+
+Explore all the possible combination and evaluate them by ROC.
+```{r}
+FcR <- interested.features
+
+n <- length(FcR)
+l <- rep(list(0:1), n)
+
+FcR.index <- expand.grid(l)
+FcR.index <- FcR.index[2^8, ]
+FcR.Data <- Data_combining_selected[, FcR]
+colnames(FcR.Data) <- FcR
+saveRDS(FcR.Data, file.path(saved.dir, "FcR.Data.RDS"))
+```
+
+```{r}
+# Negative <- interested.features[13:16]
+# 
+# n <- length(Negative)
+# l <- rep(list(0:1), n)
+# 
+# Neg.index <- expand.grid(l)
+# Neg.index <- Neg.index[-1, ]
+# Neg.Data <- Data_combining_selected[, Negative]
+# colnames(Neg.Data) <- Negative
+# saveRDS(Neg.Data, file.path(saved.dir, "Neg.Data.RDS"))
+```
+
+Calculate the seroScore.
+```{r}
+seroScore <- data.frame(matrix(NA, nrow = dim(Data_combining)[1], ncol = dim(FcR.index)[1]))
+curr.index <- 1
+for(index.p in 1 : dim(FcR.index)[1]){
+    #for(index.n in 1 : dim(Neg.index)[1]){
+      #For positive parts.
+      temp.FcR.index <- FcR.index[index.p, ]
+      temp.FcR.index <- which(temp.FcR.index == 1)
+      if(length(temp.FcR.index) > 1){
+        Temp.pos <- rowSums(FcR.Data[, temp.FcR.index]) #Sum each rows.
+      }else{
+        Temp.pos <- FcR.Data[, temp.FcR.index]
+      }
+    
+    
+      #Calculate the difference.
+      Temp.value <- Temp.pos
+      seroScore[, curr.index] <- Temp.value
+      curr.index <- curr.index + 1
+    #}
+}
+colnames(seroScore) <- "UnifiedScore"
+saveRDS(seroScore, file.path(saved.dir, 'SeroScore.RDS'))
+write.csv(seroScore, file.path(saved.dir, "SeroScore.csv"))
+```
+
+

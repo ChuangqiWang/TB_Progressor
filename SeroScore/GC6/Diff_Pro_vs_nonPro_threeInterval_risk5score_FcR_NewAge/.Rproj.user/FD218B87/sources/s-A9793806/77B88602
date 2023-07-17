@@ -1,0 +1,27 @@
+{
+    "id": "77B88602",
+    "path": "C:/0_IMPAcTB_Alter/8_Experiments_GC6/Diff_Pro_vs_nonPro_threeInterval_risk5score_FcR_NewAge/1_load_SystemSerology_Risk6Score_NewAge.Rmd",
+    "project_path": "1_load_SystemSerology_Risk6Score_NewAge.Rmd",
+    "type": "r_markdown",
+    "hash": "0",
+    "contents": "",
+    "dirty": false,
+    "created": 1683658297144.0,
+    "source_on_save": false,
+    "relative_order": 2,
+    "properties": {
+        "chunk_output_type": "inline",
+        "source_window_id": "",
+        "Source": "Source",
+        "cursorPosition": "3,3",
+        "scrollLine": "0"
+    },
+    "folds": "",
+    "lastKnownWriteTime": 1683661637,
+    "encoding": "UTF-8",
+    "collab_server": "",
+    "source_window": "",
+    "last_content_update": 1683661637650,
+    "read_only": false,
+    "read_only_alternatives": []
+}

@@ -1,0 +1,8 @@
+"0","#install.packages(""readxl"")"
+"0",""
+"0","library(ggplot2)"
+"0","library(repr)"
+"0","fig.size <- function(height, width) {"
+"0","    options(repr.plot.height = height, repr.plot.width = width)"
+"0","}"
+"0",""

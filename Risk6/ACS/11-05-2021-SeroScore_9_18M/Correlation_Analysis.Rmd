@@ -1,0 +1,117 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+meta_colors <- list(
+  "group" = c(
+    "NA" = "gray", 
+    "progressor" = "#AD07E3",
+    "non-progressor" = "#238b45"
+    )
+)
+``` 
+
+
+
+```{r}
+library(DMwR)
+#Data a folder to save the results.
+output_dir <- 'Progressor_15_24months'
+
+Data_group <- readRDS(file.path(output_dir, "Data_group.RDS"))
+Data_group <- factor(Data_group, levels = c("non-progressor", "progressor"))
+Data_combining <- readRDS(file.path(output_dir, "Data_combining.RDS"))
+
+```
+```{r}
+interested.features <- c("totalIgG_PPD",  "totalIgG_LAM", 
+"IgG1_LAM",  "IgG1_PPD", "IgA1_LAM",  "IgA1_PPD", "IgM_LAM",  "IgM_PPD", 
+"FcgR2A_PPD", "FcgR2A_LAM", "FcgR2B_PPD", "FcgR2B_LAM","FcgR2B_Hspx",
+"SNA_LAM", "RCA_LAM", "SNA_Ag85", "RCA_Ag85", "SNA_PPD", "RCA_PPD",
+"Risk6"
+)
+
+Data_combining_selected <- Data_combining[, interested.features]
+y = Data_group
+y = gsub("non-progressor", 0, y)
+y = gsub("progressor", 1, y)
+
+data.df <- data.frame(y, Data_combining_selected)
+```
+
+
+```{r}
+#Create a folder to save the results.
+saved.dir <- './Correlation_Analysis'
+if (!dir.exists(saved.dir)){
+  dir.create((saved.dir))
+}
+```
+
+
+```{r correlation heatmap}
+library(RColorBrewer)
+library(backports)
+library(Hmisc)
+library(corrplot)
+library(pheatmap)
+library(systemsseRology) # for the pval_to_asteriks function
+library(reshape2)
+corrMat <- rcorr(as.matrix(data.df), type = "spearman")
+# heatmap for full correlation matrix
+r <- corrMat$r
+p <- corrMat$P
+
+r.df <- melt(r)
+p.df <- melt(p)
+
+all(r.df$Var1 == p.df$Var1)
+all(r.df$Var2 == p.df$Var2)
+
+df.corr <- data.frame(Var1 = r.df$Var1, Var2 = r.df$Var2, R = r.df$value, pvalue = p.df$value)
+df.corr$pval_adj <- p.adjust(df.corr$pvalue, method = "BH")
+df.corr$signif <- pval_to_asteriks(df.corr$pval_adj)
+df.corr$Var1 <- factor(df.corr$Var1, levels = rev(unique(df.corr$Var1)))
+df.corr$Var2 <- factor(df.corr$Var2, levels = rev(unique(df.corr$Var2)))
+```
+```{r}
+# for intercepts
+int_hline <- c()
+int_vline <- c()
+for (ag in c("Risk6", "y")) { #"S2P", 
+  int_vline <- c(int_vline, which(grepl(paste0(ag), levels(df.corr$Var1)))[1])
+  int_hline <- c(int_hline, which(grepl(paste0(ag), levels(df.corr$Var2)))[1])
+}
+  
+p <-  ggplot(data = df.corr, aes(x = Var1, y = Var2, fill = R)) +
+      geom_tile() + theme_classic() +
+      geom_text(aes(label = signif), size = 3) +
+      geom_hline(yintercept = 1.5) +
+      geom_vline(xintercept = 1.5) +
+      geom_hline(yintercept = int_hline[which(int_hline > 1)] - 0.5) +
+      geom_vline(xintercept = int_vline[which(int_vline > 1)] - 0.5) +
+      xlab("Sel Feature") + ylab("Sel Feature") +
+      theme(aspect.ratio = 1,
+            axis.title = element_text(size = 10),
+            axis.text.y = element_text(size = 6,
+                                       vjust = 0.5, hjust = 1, color = "black"),
+            panel.border = element_blank(),
+            legend.position = "none",
+            axis.text.x = element_text(angle = 90, size = 6, vjust = 0.5,
+                                       hjust = 1, color = "black")) +
+      scale_fill_gradient2(low = "#0570b0", high = "#fd8d3c", #low = "#4495FA", high = "#862B8B",
+                           mid = "white", na.value = "grey50",
+                           limit = c(-1,1),
+                           midpoint = 0,
+                           name = paste("Spearman correlation", sep = ""))
+  
+pdf(file.path(saved.dir, "CorrelationFeature.pdf"), width = 5, height = 5)
+print(p)
+dev.off()
+png(file.path(saved.dir, "CorrelationFeature.png"), width = 1200, height = 1200, res = 300)
+print(p)
+dev.off()
+```
+

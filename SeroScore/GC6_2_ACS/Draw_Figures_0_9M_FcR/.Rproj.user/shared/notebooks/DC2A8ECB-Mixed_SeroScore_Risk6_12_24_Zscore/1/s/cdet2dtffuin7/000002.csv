@@ -1,0 +1,16 @@
+"0","```r
+#Load the seroScore
+folder <- \"../12-14-2022-Diff_Pro_vs_nonPro_9_18M_risk5score_FcR_woFunctional/SeroScore_FcR_Lasso\"
+seroScore <- readRDS(file.path(folder, 'SeroScore.RDS'))
+seroScore.interested <- seroScore[, index]
+
+#Load the datatype.
+#Data a folder to save the results.
+output_dir <- \"../12-14-2022-Diff_Pro_vs_nonPro_9_18M_risk5score_FcR_woFunctional/Progressor_9_18months\"
+
+Data_group <- readRDS(file.path(output_dir, \"Data_group.RDS\"))
+Data_group <- factor(Data_group, levels = c(\"non-progressor\", \"progressor\"))
+Data_combining <- readRDS(file.path(output_dir, \"Data_combining.RDS\"))
+
+DataScore <- data.frame(seroScore = seroScore.interested, Risk6 = Data_combining[, 'Risk6'], FCR3B_PPD = Data_combining[, 'FcgR3B_PPD'], group = Data_group)
+```"

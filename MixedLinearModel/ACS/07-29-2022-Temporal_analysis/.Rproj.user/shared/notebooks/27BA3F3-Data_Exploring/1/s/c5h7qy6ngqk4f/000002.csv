@@ -1,0 +1,58 @@
+"0","```r
+library(tidyverse)
+```"
+"1","Registered S3 methods overwritten by 'dbplyr':
+  method         from
+  print.tbl_lazy     
+  print.tbl_sql      
+[30m-- [1mAttaching packages[22m --------------------------------------- tidyverse 1.3.0 --[39m
+[30m[32mv[30m [34mtibble [30m 3.0.1     [32mv[30m [34mdplyr  [30m 1.0.0
+[32mv[30m [34mtidyr  [30m 1.1.0     [32mv[30m [34mstringr[30m 1.4.0
+[32mv[30m [34mreadr  [30m 1.3.1     [32mv[30m [34mforcats[30m 0.5.0
+[32mv[30m [34mpurrr  [30m 0.3.4     [39m
+package ‘tibble’ was built under R version 3.6.3package ‘tidyr’ was built under R version 3.6.3package ‘purrr’ was built under R version 3.6.3package ‘dplyr’ was built under R version 3.6.3package ‘forcats’ was built under R version 3.6.3[30m-- [1mConflicts[22m ------------------------------------------ tidyverse_conflicts() --
+[31mx[30m [34mdplyr[30m::[32mfilter()[30m masks [34mstats[30m::filter()
+[31mx[30m [34mdplyr[30m::[32mlag()[30m    masks [34mstats[30m::lag()[39m
+"
+"0","```r
+library(gapminder)
+library(ggpubr)
+```"
+"1","package ‘ggpubr’ was built under R version 3.6.3Registered S3 method overwritten by 'data.table':
+  method           from
+  print.data.table     
+"
+"0","```r
+library(gridExtra)
+```"
+"1","
+Attaching package: ã¤¼ã¸±gridExtraã¤¼ã¸²
+
+The following object is masked from ã¤¼ã¸±package:dplyrã¤¼ã¸²:
+
+    combine
+"
+"0","```r
+library(ggplot2)
+
+#Create a folder to save the results.
+results.folder <- './results'
+
+Data.matrix <- readRDS(file.path(results.folder, 'Data.matrix.RDS'))
+Patient.ID.wGroup <- readRDS(file.path(results.folder, 'Patient.ID.wGroup.RDS'))
+VisitType <- readRDS(file.path(results.folder, 'VisitType.RDS'))
+SystemSerogy <- readRDS(file.path(results.folder, 'SystemSerogy.RDS'))
+
+#Based on the system serogy category, we could divide them into 4 group.
+groups <- Patient.ID.wGroup$progressors.Group
+non.progressor.index <- which(groups == 'non-progressor')
+progressor.index <- which(groups == 'progressor')
+order.index <- c(progressor.index, non.progressor.index)
+ordered.Patient.ID <- Patient.ID.wGroup$progressors..Sample.ID.[order.index]
+ordered.groups <- Patient.ID.wGroup$progressors.Group[order.index]
+
+Ig <- SystemSerogy[12:88]
+functions <- SystemSerogy[89:94]
+FcgR <- SystemSerogy[95:122]
+SNA <- SystemSerogy[123:138]
+```"

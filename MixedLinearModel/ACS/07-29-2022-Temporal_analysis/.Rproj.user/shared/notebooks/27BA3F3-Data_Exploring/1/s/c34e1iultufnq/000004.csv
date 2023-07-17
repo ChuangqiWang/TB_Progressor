@@ -1,0 +1,15 @@
+"0","```r
+
+non.progressor.index <- which(Data.distribution.df.groups$groups == 'non-progressor')
+Data.distribution.df.non.progressor <- Data.distribution.df.groups[non.progressor.index, ]
+#melt mtcars into long format
+melt.non.progressor <- melt(Data.distribution.df.non.progressor)
+```"
+"1","Using groups as id variables
+"
+"0","```r
+#add column for car name
+melt.non.progressor$Patient.ID <- rep(row.names(Data.distribution.df.non.progressor), 5)
+#view first six rows of melt_mtcars
+head(melt.non.progressor)
+```"

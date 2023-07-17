@@ -1,0 +1,106 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+```{r}
+library(RColorBrewer)
+library(viridis)
+quantile_breaks <- function(xs, n = 10) {
+  breaks <- quantile(xs, probs = seq(0, 1, length.out = n))
+  breaks[!duplicated(breaks)]
+}
+
+options <- list(alpha = 1,
+                size = 1.5,
+                stroke = 0.5,
+                shape = 21
+)
+
+meta_colors <- list(
+  "group" = c(
+    "progressor" = "#AD07E3",
+    "non-progressor" = "#238b45"
+    ),
+  "group1" = c(
+    "progressor" = "#AD07E3",
+    "non-progressor" = "#238b45"
+    )
+)
+
+meta_colors <- list(
+  "group" = c(
+    "progressor" = "#fe9300",
+    "non-progressor" = "#009093"
+    ),
+  "group1" = c(
+    "progressor" = "#fe9300",
+    "non-progressor" = "#009093"
+    )
+)
+```
+
+Mixed effect of SeroScore & Risk6 Score
+```{r}
+#Load the meanAUC
+folder <- "../ACS_UnifiedScore_inGC6_0_9M"
+data <- read.csv(file.path(folder, "mean_AUC_SeroScore_FcR.csv"))
+
+#Get the index with max meanAUC
+index <- which.max(as.numeric(data))
+sel.data <- data[index]
+```
+
+
+```{r}
+#Load the seroScore
+folder <- "../ACS_UnifiedScore_inGC6_0_9M/SeroScore_FcR_Lasso"
+seroScore <- readRDS(file.path(folder, 'SeroScore.RDS'))
+seroScore.interested <- seroScore[, index]
+
+#Load the datatype.
+#Data a folder to save the results.
+output_dir <- '../../8_Experiments_GC6/Diff_Pro_vs_nonPro_0_9M_risk5score_FcR_woFunctional/Progressor_0_9months'
+
+Data_group <- readRDS(file.path(output_dir, "Data_group.RDS"))
+Data_group <- factor(Data_group, levels = c("non-progressor", "progressor"))
+Data_combining <- readRDS(file.path(output_dir, "Data_combining.RDS"))
+
+DataScore <- data.frame(seroScore = seroScore.interested, Risk6 = Data_combining[, 'Risk6'], FCR3B_PPD = Data_combining[, 'FcgR3B_PPD'], group = Data_group)
+```
+
+
+```{r}
+#Create a folder to save the results.
+saved.dir <- './mean_SeroScore_substract_zscore_v2'
+if (!dir.exists(saved.dir)){
+  dir.create((saved.dir))
+}
+```
+
+Visualization
+```{r}
+library(ggplot2)
+library(ggrepel)
+ggplot(data = DataScore[sample(nrow(DataScore)),]) +
+  geom_point(
+    mapping = aes_string(x = "seroScore", y = "Risk6", fill = "group"),
+    color = "black",
+                        size = options$size,
+                        alpha = options$alpha,
+                        stroke = options$stroke,
+                        shape = options$shape,
+                        show.legend = TRUE) +
+  scale_fill_manual(values = meta_colors$group, name = "group") +
+  labs(x = "seroScore",y = "Risk6") +
+  theme_classic(base_size = 8) +
+  theme( legend.text = element_text(face = "bold", color = "black"),
+              axis.title = element_text(face = "bold", color = "black"),
+              axis.text = element_text(face = "bold", color = "black")) +
+  theme(legend.position = "none",
+                   aspect.ratio = 1)#,
+                   #axis.text = ggplot2::element_text(color = "black"))
+filename <- 'Sero_0_9M_group.pdf'
+ggsave(file = file.path(saved.dir, filename), width = 3, height = 3, dpi = 300)
+filename <- 'Sero_0_9M_group.png'
+ggsave(file = file.path(saved.dir, filename), width = 3, height = 3, dpi = 300)
+```

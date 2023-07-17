@@ -1,0 +1,18 @@
+"0","```r
+#
+#Risk6 <- Syssero.Name[length(Syssero.Name)]
+eliminating.antigen <- c('Ebola', 'HA', 'CMV', 'CMV_gB', 'CMV_pentamer', 'EBV')
+Ebola.related <- grep('Ebola', Syssero.Name, value=TRUE)
+HA.related <- grep('HA', Syssero.Name, value=TRUE)
+CMV.related <- grep('CMV', Syssero.Name, value= TRUE)
+EBV.related <- grep('EBV', Syssero.Name, value = TRUE)
+
+excluded.features <- c(Ebola.related, HA.related, CMV.related, EBV.related) #, Risk6)
+
+feature.index <- which(Syssero.Name %in% excluded.features)
+# 
+Syssero.Name <- setdiff(Syssero.Name, excluded.features)
+# 
+Progressor <- Progressor[, -feature.index]
+NonProgressor <- NonProgressor[, , -feature.index]
+```"

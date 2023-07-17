@@ -1,0 +1,93 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+meta_colors <- list(
+  "group" = c(
+    "NA" = "gray", 
+    "progressor" = "#AD07E3",
+    "non-progressor" = "#238b45"
+    )
+)
+``` 
+
+
+
+```{r}
+library(DMwR2)
+#Data a folder to save the results.
+output_dir <- 'Progressor_allmonths'
+
+Data_group <- readRDS(file.path(output_dir, "Data_group.RDS"))
+Data_group <- factor(Data_group, levels = c("non-progressor", "progressor"))
+Data_combining <- readRDS(file.path(output_dir, "Data_combining.RDS"))
+
+Data_combining_scale <- Data_combining
+#Z-score the data to bring the parameters to the same scale.
+#Data_combining_scale <- scale(knnImputation(Data_combining), center = TRUE, scale = TRUE)
+#colnames(Data_combining_scale) <- colnames(Data_combining)
+#rownames(Data_combining_scale) <- rownames(Data_combining)
+```
+
+```{r}
+#Create a folder to save the results.
+saved.dir <- './Classification_RF_LASSO'
+if (!dir.exists(saved.dir)){
+  dir.create((saved.dir))
+}
+```
+
+
+
+```{r}
+
+y = Data_group
+y = gsub("non-progressor", "NO", y)
+y = gsub("progressor", "YES", y)
+
+data.df <- data.frame(y = factor(y), x = Data_combining_scale) #[, selected_features]) 15
+```
+
+
+
+
+
+
+
+```{r}
+library(caret)
+library(systemsseRology)
+
+for(index in 1 : 100){
+  set.seed(index + 1986)
+  #####################1. Split the data into training and test set.
+  # A stratified random split of the data
+  idx_train <- createDataPartition(data.df$y,
+                                 p = 0.8, # percentage of data as training
+                                 list = FALSE)
+  dt_train <- data.df[idx_train, ]
+  dt_test <- data.df[-idx_train, ]
+  table(dt_train$y)
+  table(dt_test$y)
+  write.csv(idx_train, file = file.path(saved.dir, paste0("idx_train_", toString(index), ".csv")))
+  #####################2. Feature Selection
+  #Feature Selection
+  opts_sel <- list(n_trials = 10, threshold = 0.8, return_count = FALSE)
+  sel_features <- select_lasso(as.matrix(dt_train[, 2:dim(dt_train)[2]]), dt_train$y)
+  sel_features <- gsub("x.", "", sel_features)
+  print(sel_features)
+  #repeat this selection 10 times and pick the features that are chosen in
+  #more than 80% of the repetitions
+  # selected_features <- select_repeat(Data_combining_scale, Data_group,
+  #                              selector = select_lasso,
+  #                              options = opts_sel)
+  # print(selected_features)
+  temp.index <- which(colnames(dt_train) %in% sel_features)
+  dt_train <- dt_train[, c(1, temp.index)]
+  dt_test <- dt_test[, c(1, temp.index)]
+  write.csv(sel_features, file = file.path(saved.dir, paste0("sel_features_", toString(index), ".csv")))
+}
+```
+

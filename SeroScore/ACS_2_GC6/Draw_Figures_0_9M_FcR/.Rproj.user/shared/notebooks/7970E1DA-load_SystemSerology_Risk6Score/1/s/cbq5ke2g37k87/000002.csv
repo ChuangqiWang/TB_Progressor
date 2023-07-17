@@ -1,0 +1,9 @@
+"0","```r
+all(colnames(NonProgressor.selected) == colnames(Progressor))
+```"
+"1","[1] TRUE
+"
+"0","```r
+Data_combining <- rbind(Progressor, NonProgressor.selected)
+Data_group <- c(rep(\"progressor\", dim(Progressor)[1]), rep(\"non-progressor\", dim(NonProgressor.selected)[1]))
+```"

@@ -1,0 +1,12 @@
+"0","```r
+# Negative <- interested.features[13:16]
+# 
+# n <- length(Negative)
+# l <- rep(list(0:1), n)
+# 
+# Neg.index <- expand.grid(l)
+# Neg.index <- Neg.index[-1, ]
+# Neg.Data <- Data_combining_selected[, Negative]
+# colnames(Neg.Data) <- Negative
+# saveRDS(Neg.Data, file.path(saved.dir, \"Neg.Data.RDS\"))
+```"

@@ -1,0 +1,32 @@
+"0","```r
+NonProgressor.Flag <- array(NA, dim = c(105, 5))
+for(Pat.ID in 1 : 105){
+  for(Day.ID in 1 : 5){
+    temp.data <- NonProgressor[Pat.ID, Day.ID, ]
+    NonProgressor.Flag[Pat.ID, Day.ID] <- any(is.na(temp.data))
+  }
+}
+
+#Select the Pat.ID
+
+#Randimized and choose one Day per Patient
+Day.Flag <- array(NA, dim = 105)
+NonProgressor.selected <- array(NA, dim = c(105, dim(Progressor)[2]))
+for(Pat.ID in 1 : 105){
+  temp.flag <- which(NonProgressor.Flag[Pat.ID, ] == FALSE)
+  if(length(temp.flag) != 0){
+    if(length(temp.flag) > 1)
+      Day.Flag[Pat.ID] <- sample(temp.flag, 1)
+    else
+      Day.Flag[Pat.ID] <- temp.flag
+    
+    NonProgressor.selected[Pat.ID, ] <- NonProgressor[Pat.ID, Day.Flag[Pat.ID], ]
+  }
+}
+
+rownames(NonProgressor.selected) <- NonProgressor.Pat.IDs$progressors..Sample.ID.
+colnames(NonProgressor.selected) <- Syssero.Name
+
+temp.index <- which(apply(NonProgressor.selected, 1, function(x) all(is.na(x))))
+NonProgressor.selected <- NonProgressor.selected[-temp.index, ]
+```"

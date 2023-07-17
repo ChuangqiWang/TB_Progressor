@@ -1,0 +1,27 @@
+{
+    "id": "7E273CA7",
+    "path": "C:/0_IMPAcTB_Alter/8_Experiments_GC6_unificedscore_in_ACS/Draw_Figures_9_18M_FcR/Mixed_SeroScore_Risk6_12_24_Zscore_V2.Rmd",
+    "project_path": "Mixed_SeroScore_Risk6_12_24_Zscore_V2.Rmd",
+    "type": "r_markdown",
+    "hash": "4287786241",
+    "contents": "",
+    "dirty": false,
+    "created": 1679882502109.0,
+    "source_on_save": false,
+    "relative_order": 1,
+    "properties": {
+        "chunk_output_type": "inline",
+        "source_window_id": "",
+        "Source": "Source",
+        "cursorPosition": "56,56",
+        "scrollLine": "40"
+    },
+    "folds": "",
+    "lastKnownWriteTime": 1679883371,
+    "encoding": "UTF-8",
+    "collab_server": "",
+    "source_window": "",
+    "last_content_update": 1679883371085,
+    "read_only": false,
+    "read_only_alternatives": []
+}

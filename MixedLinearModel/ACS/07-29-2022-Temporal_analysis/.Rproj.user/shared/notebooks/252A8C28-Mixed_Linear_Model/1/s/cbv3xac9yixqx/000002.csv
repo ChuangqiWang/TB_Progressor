@@ -1,0 +1,7 @@
+"0","```r
+#Create a folder to save the results.
+saved.dic <- './Data.Visualization'
+if (!dir.exists(saved.dic)){
+  dir.create((saved.dic))
+}
+```"

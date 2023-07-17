@@ -1,0 +1,78 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+1. loading the raw data from progressors.functions.
+```{r loading the dataset}
+library("readxl")
+folder.directory <- '../../0_Frozen_Dataset/reslidesfromprogressors'
+filename <- 'ProgAb_demo.csv'
+
+# csv files
+meta.progressors <- read.csv(file.path(folder.directory, filename))
+
+index <- which(meta.progressors$timeToTB == 999)
+meta.progressors[index, 10] <- NA
+
+meta.progressors$VisitType <- as.character(meta.progressors$VisitType)
+index <- which(meta.progressors$VisitType == "D0")
+meta.progressors[index, 4] <- "D000"
+```
+
+2. loading the raw data from raw.data
+```{r}
+library("readxl")
+folder.directory <- '../../0_Frozen_Dataset/reslidesfromprogressors'
+filename <- '20200511_ACS_summary_data_for_Chuangqi_with_plate.xlsx'
+
+# Before reading data, we will return the names of the sheets for later use:
+sheets.name <- excel_sheets(file.path(folder.directory, filename))
+# xlsx files
+progressors <- read_excel(file.path(folder.directory, filename), sheet = "progressors")
+
+SampleID <- progressors$`Sample ID`
+SampleID <- gsub("/", "", SampleID)
+SampleID <- substring(SampleID, 2)
+progressors$`Sample ID` <- as.numeric(SampleID)
+```
+3. merge two data frames together
+```{r}
+meta.sero.data <- meta.progressors
+sero.data.index <- c()
+for(index in 1 : dim(meta.progressors)[1]){
+  temp.meta <- meta.progressors[index, ]
+  ID.index <- which(progressors$`Sample ID` == temp.meta$SubjectID)
+  VisitType.index <- which(progressors$VisitType == temp.meta$VisitType)
+  index <- intersect(ID.index, VisitType.index)
+  #print(index)
+  if(length(index) == 0){
+    sero.data.index <- c(sero.data.index, NA)
+  }else{
+    sero.data.index <- c(sero.data.index, index)
+  }
+}
+
+meta.sero.data <- meta.sero.data[!is.na(sero.data.index), ]
+sero.data.index <- sero.data.index[!is.na(sero.data.index)]
+sero.data <- progressors[sero.data.index, c(3, 7, 9:dim(progressors)[2])]
+#Remove the 'Ebola' and 'HA'
+eliminating.antigen <- c('Ebola', 'HA', 'CMV', 'EBV')
+Ebola.related <- grep('Ebola', colnames(sero.data), value=TRUE)
+HA.related <- grep('HA', colnames(sero.data), value=TRUE)
+CMV.related <- grep('CMV', colnames(sero.data), value=TRUE)
+EBV.related <- grep('EBV', colnames(sero.data), value=TRUE)
+
+excluded.features <- c(Ebola.related, HA.related, CMV.related, EBV.related)
+feature.index <- which(colnames(sero.data) %in% excluded.features)
+sero.data <- sero.data[, -feature.index]
+
+meta.sero.data <- cbind(meta.sero.data, sero.data)
+meta.sero.data$aliquot_plate <- factor(meta.sero.data$aliquot_plate)
+saveRDS(meta.sero.data, 'meta.sero.data.RDS')
+```
+
+
+
+
+

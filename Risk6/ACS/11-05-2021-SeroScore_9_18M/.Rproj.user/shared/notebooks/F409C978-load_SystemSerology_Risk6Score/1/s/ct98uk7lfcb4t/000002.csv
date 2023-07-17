@@ -1,0 +1,8 @@
+"0","temp.index <- which(apply(Data_combining, 1, function(x) any(is.na(x))))"
+"0","Data_group <- Data_group[-temp.index]"
+"0","Data_combining <- Data_combining[-temp.index, ]"
+"0","saveRDS(Data_group, file.path(output_dir, ""Data_group.RDS""))"
+"0","saveRDS(Data_combining, file.path(output_dir, ""Data_combining.RDS""))"
+"0",""
+"0","write.csv(Data_group, file.path(output_dir, ""Data_group.csv""))"
+"0","write.csv(Data_combining, file.path(output_dir, ""Data_combining.csv""))"

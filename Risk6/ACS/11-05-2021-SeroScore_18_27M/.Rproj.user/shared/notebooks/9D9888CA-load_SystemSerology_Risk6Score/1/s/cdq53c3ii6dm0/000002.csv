@@ -1,0 +1,6 @@
+"0","## Provide the dir name(i.e sub dir) that you want to create under main dir:"
+"0","output_dir <- 'Progressor_18_27months'"
+"0",""
+"0","if (!dir.exists(output_dir)){"
+"0","dir.create(output_dir)"
+"0","}"

@@ -1,0 +1,36 @@
+"0","```r
+results.IgG <- './results_IgG_ordered'
+if (!dir.exists(results.IgG)){
+  dir.create((results.IgG))
+}
+totalIgG <- SystemSerogy[1:11]
+Data.matrix.total.IgG <- Data.matrix[, , 1:11]
+options(repr.plot.height = 25, repr.plot.width = 25)
+
+
+for(index in 1 : 11){
+  temp.matrix.IgG <- data.frame(Data.matrix.total.IgG[, , index])
+  colnames(temp.matrix.IgG) <- VisitType
+  rownames(temp.matrix.IgG) <- Patient.ID.wGroup$progressors..Sample.ID.
+  
+
+  #melt mtcars into long format
+  
+  melt.IgG <- melt(temp.matrix.IgG)
+  #add column for car name
+  melt.IgG$Patient.ID <- rep(row.names(temp.matrix.IgG), 5)
+  #view first six rows of melt_mtcars
+  ind <- ggplot(melt.IgG, aes(variable, factor(Patient.ID, levels = ordered.Patient.ID))) +
+  geom_tile(aes(fill = value), colour = \"white\") +
+  scale_fill_gradient(low = \"blue\", high = \"red\") + 
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  labs(x = 'Times', title = 'progressor vs non-progressor', y = 'Patient.ID') +
+  geom_hline(yintercept=36, linetype=\"dashed\", color = \"yellow\", size=2) +
+  coord_flip()
+  plot(ind)
+  
+  ggsave(file.path(results.IgG, paste0(totalIgG[index], \".png\", collapse  = \"\")), ind, width = 18, height = 4)
+}
+```"
+"1","No id variables; using all as measure variables
+"

@@ -1,0 +1,16 @@
+"0","library(DMwR2)"
+"2","Warning:"
+"2"," package ‘DMwR2’ was built under R version 4.1.3
+"
+"2","Registered S3 method overwritten by 'quantmod':
+  method            from
+  as.zoo.data.frame zoo 
+"
+"0","#Data a folder to save the results."
+"0","output_dir <- '../../8_Experiments_GC6/Diff_Pro_vs_nonPro_9_18M_risk5score_FcR_woFunctional/Progressor_9_18months'"
+"0",""
+"0","Data_group <- readRDS(file.path(output_dir, ""Data_group.RDS""))"
+"0","Data_group <- factor(Data_group, levels = c(""non-progressor"", ""progressor""))"
+"0","Data_combining <- readRDS(file.path(output_dir, ""Data_combining.RDS""))"
+"0",""
+"0","Data_combining <- scale(Data_combining, center = TRUE, scale = TRUE)"

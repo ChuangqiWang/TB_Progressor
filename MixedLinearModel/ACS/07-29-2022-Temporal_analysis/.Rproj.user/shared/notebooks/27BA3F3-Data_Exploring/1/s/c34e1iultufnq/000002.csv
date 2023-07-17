@@ -1,0 +1,20 @@
+"0","```r
+#load reshape2 package to use melt() function
+library(reshape2)
+
+#Draw histogram distribution
+colnames(Data.distribution) <- VisitType
+rownames(Data.distribution) <- Patient.ID.wGroup$progressors..Sample.ID.
+Data.distribution.df <- data.frame(Data.distribution)
+
+#melt mtcars into long format
+melt.Data.distribution.df <- melt(Data.distribution.df)
+```"
+"1","No id variables; using all as measure variables
+"
+"0","```r
+#add column for car name
+melt.Data.distribution.df$Patient.ID <- rep(row.names(Data.distribution.df), 5)
+#view first six rows of melt_mtcars
+head(melt.Data.distribution.df)
+```"

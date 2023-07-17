@@ -1,0 +1,27 @@
+"0","library(dplyr)"
+"2","Warning:"
+"2"," package ‘dplyr’ was built under R version 4.1.3
+"
+"2","
+Attaching package: ‘dplyr’
+
+"
+"2","The following objects are masked from ‘package:stats’:
+
+    filter, lag
+
+"
+"2","The following objects are masked from ‘package:base’:
+
+    intersect, setdiff, setequal, union
+
+"
+"0","interested.features <- c(""IgG1_LAM"", ""IgG2_PPD"", ""IgG2_ESAT6"", ""IgA1_PPD"", "
+"0","                         ""IgM_PPD"", ""FcgR3B_PPD"") #""IgA2_PPD"", "
+"0",""
+"0","Data_combining_selected <- Data_combining[, interested.features]"
+"0","y = Data_group"
+"0","y = gsub(""non-progressor"", 0, y)"
+"0","y = gsub(""progressor"", 1, y)"
+"0",""
+"0","data.df <- data.frame(y, Data_combining_selected)"

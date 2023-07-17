@@ -1,0 +1,27 @@
+{
+    "id": "F727DB0D",
+    "path": "C:/0_IMPAcTB_Alter/8_Experiments_GC6/Diff_Pro_vs_nonPro_18_27M_risk5score_FcR_woFunctional/1_load_SystemSerology_Risk6Score.Rmd",
+    "project_path": "1_load_SystemSerology_Risk6Score.Rmd",
+    "type": "r_markdown",
+    "hash": "2234402331",
+    "contents": "",
+    "dirty": false,
+    "created": 1679684554281.0,
+    "source_on_save": false,
+    "relative_order": 1,
+    "properties": {
+        "chunk_output_type": "inline",
+        "source_window_id": "",
+        "Source": "Source",
+        "cursorPosition": "66,43",
+        "scrollLine": "52"
+    },
+    "folds": "",
+    "lastKnownWriteTime": 1679722227,
+    "encoding": "UTF-8",
+    "collab_server": "",
+    "source_window": "",
+    "last_content_update": 1679722227562,
+    "read_only": false,
+    "read_only_alternatives": []
+}

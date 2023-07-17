@@ -1,0 +1,1 @@
+The plots in Supplementary Figure 4 were saved in the following folder: SeroScore\GC6\Diff_Pro_vs_nonPro_threeInterval_risk5score_FcR_NewAge

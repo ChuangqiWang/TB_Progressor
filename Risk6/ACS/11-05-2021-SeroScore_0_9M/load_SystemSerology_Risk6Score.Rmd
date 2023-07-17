@@ -1,0 +1,163 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+meta_colors <- list(
+  "group" = c(
+    "progressor" = "#AD07E3",
+    "non-progressor" = "#238b45"
+    ),
+  "group1" = c(
+    "progressor" = "#AD07E3",
+    "non-progressor" = "#238b45"
+    )
+)
+```
+
+
+Quantile Breaks
+```{r}
+set.seed(1986)
+
+library(RColorBrewer)
+library(viridis)
+quantile_breaks <- function(xs, n = 10) {
+  breaks <- quantile(xs, probs = seq(0, 1, length.out = n))
+  breaks[!duplicated(breaks)]
+}
+
+```
+
+```{r}
+folder <- "../11-04-2021-ROC_curve_score_0_9M"
+
+Progressor <- readRDS(file.path(paste0(folder, "/Progressor_0_9months"), "Progressor_0_9months.RDS"))
+
+NonProgressor <- readRDS(file.path(paste0(folder, "/NonProgressors"), "NonProgressor.RDS"))
+NonProgressor.Pat.IDs <- readRDS(file.path(paste0(folder, "/NonProgressors"), "NonProgressor.Patient.IDs.RDS"))
+Syssero.Name <- readRDS(file.path(paste0(folder, "/NonProgressors"), "SystemSerogy.RDS"))
+```
+
+Ignore some non-directly TB related features and also risk6score
+```{r}
+#
+#Risk6 <- Syssero.Name[length(Syssero.Name)]
+eliminating.antigen <- c('Ebola', 'HA', 'CMV', 'CMV_gB', 'CMV_pentamer', 'EBV')
+Ebola.related <- grep('Ebola', Syssero.Name, value=TRUE)
+HA.related <- grep('HA', Syssero.Name, value=TRUE)
+CMV.related <- grep('CMV', Syssero.Name, value= TRUE)
+EBV.related <- grep('EBV', Syssero.Name, value = TRUE)
+
+excluded.features <- c(Ebola.related, HA.related, CMV.related, EBV.related) #, Risk6)
+
+feature.index <- which(Syssero.Name %in% excluded.features)
+# 
+Syssero.Name <- setdiff(Syssero.Name, excluded.features)
+# 
+Progressor <- Progressor[, -feature.index]
+NonProgressor <- NonProgressor[, , -feature.index]
+```
+
+```{r}
+## Provide the dir name(i.e sub dir) that you want to create under main dir:
+output_dir <- 'Progressor_0_9months'
+
+if (!dir.exists(output_dir)){
+dir.create(output_dir)
+}
+```
+
+```{r}
+NonProgressor.Flag <- array(NA, dim = c(105, 5))
+for(Pat.ID in 1 : 105){
+  for(Day.ID in 1 : 5){
+    temp.data <- NonProgressor[Pat.ID, Day.ID, ]
+    NonProgressor.Flag[Pat.ID, Day.ID] <- any(is.na(temp.data))
+  }
+}
+
+#Select the Pat.ID
+
+#Randimized and choose one Day per Patient
+Day.Flag <- array(NA, dim = 105)
+NonProgressor.selected <- array(NA, dim = c(105, dim(Progressor)[2]))
+for(Pat.ID in 1 : 105){
+  temp.flag <- which(NonProgressor.Flag[Pat.ID, ] == FALSE)
+  if(length(temp.flag) != 0){
+    if(length(temp.flag) > 1)
+      Day.Flag[Pat.ID] <- sample(temp.flag, 1)
+    else
+      Day.Flag[Pat.ID] <- temp.flag
+    
+    NonProgressor.selected[Pat.ID, ] <- NonProgressor[Pat.ID, Day.Flag[Pat.ID], ]
+  }
+}
+
+rownames(NonProgressor.selected) <- NonProgressor.Pat.IDs$progressors..Sample.ID.
+colnames(NonProgressor.selected) <- Syssero.Name
+
+temp.index <- which(apply(NonProgressor.selected, 1, function(x) all(is.na(x))))
+NonProgressor.selected <- NonProgressor.selected[-temp.index, ]
+```
+
+```{r}
+all(colnames(NonProgressor.selected) == colnames(Progressor))
+
+Data_combining <- rbind(Progressor, NonProgressor.selected)
+Data_group <- c(rep("progressor", dim(Progressor)[1]), rep("non-progressor", dim(NonProgressor.selected)[1]))
+```
+
+
+```{r}
+temp.index <- which(apply(Data_combining, 1, function(x) any(is.na(x))))
+Data_group <- Data_group[-temp.index]
+Data_combining <- Data_combining[-temp.index, ]
+saveRDS(Data_group, file.path(output_dir, "Data_group.RDS"))
+saveRDS(Data_combining, file.path(output_dir, "Data_combining.RDS"))
+
+write.csv(Data_group, file.path(output_dir, "Data_group.csv"))
+write.csv(Data_combining, file.path(output_dir, "Data_combining.csv"))
+```
+
+
+```{r}
+library(pheatmap)
+
+annotation_row <- data.frame(group1 = Data_group, group = Data_group)
+rownames(annotation_row) <- rownames(Data_combining)
+
+ordered_index <- order(annotation_row$group, annotation_row$group1)
+annotation_row_ordered <- annotation_row[ordered_index, ]
+
+data.sero.ordered <- scale(Data_combining[ordered_index, ], center = TRUE, scale = TRUE)
+
+mat_breaks <- quantile_breaks(na.omit(unlist(data.sero.ordered)), n = 100)
+png(file.path(output_dir, "heatmap.scaled.png"), width=3560, height=1940, res = 300)
+pheatmap(
+    mat = data.sero.ordered,
+   border_color = NA,
+    color = colorRampPalette(rev(brewer.pal(n = 8, name = "RdYlBu")))(length(mat_breaks) - 1),
+    #color = inferno(length(mat_breaks) - 1),
+    breaks = mat_breaks,
+    show_rownames = FALSE,
+    show_colnames = TRUE,
+    cluster_rows = FALSE,
+    cluster_cols = TRUE,
+    annotation_row = annotation_row_ordered,
+    annotation_colors = meta_colors,
+    fontsize = 6,
+    fontsize_col = 5,
+    fontsize_row = 5,
+    scale = "none",
+    main  = "Serology Data with Quantile Color Scale"
+  )
+dev.off()
+
+```

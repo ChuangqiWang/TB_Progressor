@@ -1,0 +1,13 @@
+"0","```r
+# RCA/SNA features are located from 111-122
+logscale.Data.matrix <- Data.matrix
+for(i in 1:110){
+  temp.matrix <- Data.matrix[ , ,i]
+  logscale.Data.matrix[, , i] <- log2(temp.matrix + 1)
+}
+saveRDS(logscale.Data.matrix, 'logscale.Data.matrix.RDS')
+saveRDS(Patient.ID.wGroup, 'Patient.ID.wGroup.RDS')
+saveRDS(VisitType, 'VisitType.RDS')
+saveRDS(SystemSerogy, 'SystemSerogy.RDS')
+
+```"

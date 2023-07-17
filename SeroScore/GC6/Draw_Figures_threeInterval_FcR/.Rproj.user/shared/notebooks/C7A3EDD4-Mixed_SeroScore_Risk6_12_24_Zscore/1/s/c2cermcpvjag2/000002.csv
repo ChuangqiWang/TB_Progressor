@@ -1,0 +1,20 @@
+"0","```r
+library(ggplot2)
+library(reshape2)
+Interested.Features <- Combined.Dataset[, 1:7]
+Interested.Features.df <- melt(Interested.Features)
+colnames(Interested.Features.df) <- c(\"SampleID\", \"Features\", \"Value\")
+
+Features <- c(\"IgA1_PPD\", \"IgG2_PPD\", \"IgG2_ESAT6\", \"IgA2_PPD\", \"IgM_PPD\", \"IgG1_LAM\", \"FcgR3B_PPD\")
+Interested.Features.df$Features <- factor(Interested.Features.df$Features, levels = Features)
+ggplot(Interested.Features.df, aes(x=Features, y=Value, fill = Features)) + 
+  geom_boxplot(outlier.shape = NA, fill=\"gray\") +
+  scale_fill_brewer(palette=\"Blues\") +
+  labs(x = \"Features\",y = \"Measurement\") +
+  theme_classic(base_size = 8) +
+  theme( legend.text = element_text(face = \"bold\", color = \"black\"),
+              axis.title = element_text(face = \"bold\", color = \"black\"),
+              axis.text = element_text(face = \"bold\", color = \"black\"),
+              axis.text.x = element_text(angle = 30, hjust = 1))
+ggsave(file.path(saved.dir, \"BoxPlot_v3.png\"), width = 2., height = 1.5)
+```"

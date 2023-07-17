@@ -1,0 +1,27 @@
+{
+    "id": "36F6FDA2",
+    "path": "C:/0_IMPAcTB_Alter/8_Experiments_GC6/Draw_Figures_threeInterval_FcR/Mixed_SeroScore_Risk6_12_24_Zscore.Rmd",
+    "project_path": "Mixed_SeroScore_Risk6_12_24_Zscore.Rmd",
+    "type": "r_markdown",
+    "hash": "2671208743",
+    "contents": "",
+    "dirty": false,
+    "created": 1679870619857.0,
+    "source_on_save": false,
+    "relative_order": 1,
+    "properties": {
+        "chunk_output_type": "inline",
+        "source_window_id": "",
+        "Source": "Source",
+        "cursorPosition": "49,23",
+        "scrollLine": "36"
+    },
+    "folds": "",
+    "lastKnownWriteTime": 1679873058,
+    "encoding": "UTF-8",
+    "collab_server": "",
+    "source_window": "",
+    "last_content_update": 1679873058854,
+    "read_only": false,
+    "read_only_alternatives": []
+}

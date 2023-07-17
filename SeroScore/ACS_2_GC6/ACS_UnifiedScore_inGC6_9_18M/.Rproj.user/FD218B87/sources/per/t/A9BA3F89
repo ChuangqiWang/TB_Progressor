@@ -1,0 +1,27 @@
+{
+    "id": "A9BA3F89",
+    "path": "C:/0_IMPAcTB_Alter/8_Experiments_ACS_GC6/ACS_UnifiedScore_inGC6_9_18M/4_Define_SeroScore_LassoFeatureSelection.Rmd",
+    "project_path": "4_Define_SeroScore_LassoFeatureSelection.Rmd",
+    "type": "r_markdown",
+    "hash": "3686320237",
+    "contents": "",
+    "dirty": false,
+    "created": 1678976019428.0,
+    "source_on_save": false,
+    "relative_order": 1,
+    "properties": {
+        "chunk_output_type": "inline",
+        "source_window_id": "",
+        "Source": "Source",
+        "cursorPosition": "13,4",
+        "scrollLine": "6"
+    },
+    "folds": "",
+    "lastKnownWriteTime": 1679719729,
+    "encoding": "UTF-8",
+    "collab_server": "",
+    "source_window": "",
+    "last_content_update": 1679719729549,
+    "read_only": false,
+    "read_only_alternatives": []
+}

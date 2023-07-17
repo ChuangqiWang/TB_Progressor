@@ -1,0 +1,6 @@
+"0","## Provide the dir name(i.e sub dir) that you want to create under main dir:"
+"0","saved.dir <- 'Progressor_allmonths_Correlation_Analysis'"
+"0",""
+"0","if (!dir.exists(saved.dir)){"
+"0","dir.create(saved.dir)"
+"0","}"

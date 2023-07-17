@@ -1,0 +1,7 @@
+"0","folder <- ""../11-04-2021-ROC_curve_score_0_9M"""
+"0",""
+"0","Progressor <- readRDS(file.path(paste0(folder, ""/Progressor_0_9months""), ""Progressor_0_9months.RDS""))"
+"0",""
+"0","NonProgressor <- readRDS(file.path(paste0(folder, ""/NonProgressors""), ""NonProgressor.RDS""))"
+"0","NonProgressor.Pat.IDs <- readRDS(file.path(paste0(folder, ""/NonProgressors""), ""NonProgressor.Patient.IDs.RDS""))"
+"0","Syssero.Name <- readRDS(file.path(paste0(folder, ""/NonProgressors""), ""SystemSerogy.RDS""))"

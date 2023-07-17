@@ -1,0 +1,135 @@
+"0","library(tidyverse)"
+"2","Registered S3 methods overwritten by 'dbplyr':
+  method         from
+  print.tbl_lazy     
+  print.tbl_sql      
+"
+"2","[30m-- [1mAttaching packages[22m ------------------------------------------------------------------------------- tidyverse 1.3.1 --[39m
+"
+"2","[30m[32mâˆš[30m [34mtibble [30m 3.1.7     [32mâˆš[30m [34mpurrr  [30m 0.3.4
+[32mâˆš[30m [34mtidyr  [30m 1.2.0     [32mâˆš[30m [34mstringr[30m 1.4.0
+[32mâˆš[30m [34mreadr  [30m 2.1.2     [32mâˆš[30m [34mforcats[30m 0.5.1[39m
+"
+"2","Warning:"
+"2"," package ‘tibble’ was built under R version 4.1.3
+"
+"2","[30m-- [1mConflicts[22m ---------------------------------------------------------------------------------- tidyverse_conflicts() --
+[31mx[30m [34mrstatix[30m::[32mfilter()[30m  masks [34mdplyr[30m::filter(), [34mstats[30m::filter()
+[31mx[30m [34mdplyr[30m::[32mlag()[30m       masks [34mstats[30m::lag()
+[31mx[30m [34mpurrr[30m::[32mnegate()[30m    masks [34mbinaryLogic[30m::negate()
+[31mx[30m [34mHmisc[30m::[32msrc()[30m       masks [34mdplyr[30m::src()
+[31mx[30m [34mHmisc[30m::[32msummarize()[30m masks [34mdplyr[30m::summarize()[39m
+"
+"0","library(igraph)"
+"2","Warning:"
+"2"," package ‘igraph’ was built under R version 4.1.3
+"
+"2","
+Attaching package: ‘igraph’
+
+"
+"2","The following objects are masked from ‘package:purrr’:
+
+    compose, simplify
+
+"
+"2","The following object is masked from ‘package:tidyr’:
+
+    crossing
+
+"
+"2","The following object is masked from ‘package:tibble’:
+
+    as_data_frame
+
+"
+"2","The following objects are masked from ‘package:dplyr’:
+
+    as_data_frame, groups, union
+
+"
+"2","The following objects are masked from ‘package:stats’:
+
+    decompose, spectrum
+
+"
+"2","The following object is masked from ‘package:base’:
+
+    union
+
+"
+"0","library(ggraph)"
+"0","library(ggrepel)"
+"0","library(RColorBrewer)"
+"0","library(reshape2)"
+"2","
+Attaching package: ‘reshape2’
+
+"
+"2","The following object is masked from ‘package:tidyr’:
+
+    smiths
+
+"
+"0","library(spdep)"
+"2","Warning:"
+"2"," package ‘spdep’ was built under R version 4.1.3
+"
+"2","Loading required package: sp
+"
+"2","Warning:"
+"2"," package ‘sp’ was built under R version 4.1.3
+"
+"2","
+Attaching package: ‘sp’
+
+"
+"2","The following object is masked from ‘package:ggraph’:
+
+    geometry
+
+"
+"2","Loading required package: spData
+"
+"2","To access larger datasets in this package, install the spDataLarge package with:
+`install.packages('spDataLarge', repos='https://nowosad.github.io/drat/', type='source')`
+"
+"2","Loading required package: sf
+"
+"2","Linking to GEOS 3.9.1, GDAL 3.2.1, PROJ 7.2.1; sf_use_s2() is TRUE
+"
+"0","melt.coef.selected <- melt(corrMat.coef.selected)"
+"0","melt.adjpvalue.selected <- melt(corrMat.adjpvalue)"
+"0","adjpvalue.selected.index <- which(melt.adjpvalue.selected$value < 0.05)"
+"0",""
+"0","melt.coef.selected.sign <- melt.coef.selected[adjpvalue.selected.index, ]"
+"0","melt.adjpvalue.selected.sign <- melt.adjpvalue.selected[adjpvalue.selected.index, ]"
+"0","colnames(melt.coef.selected.sign) <- c(""x"", ""y"", ""corr.coef"")"
+"0","#Plot"
+"0","graphCors <- melt.coef.selected.sign %>% "
+"0","  filter(abs(corr.coef) > default_threshold  & (is.element(x, selected_features) | is.element(y, selected_features))) %>% "
+"0","  graph_from_data_frame(directed = FALSE)"
+"0",""
+"0","layout <- create_layout(graphCors, layout = 'igraph', algorithm = 'nicely')"
+"0","#manual_layout <- create_layout(graph = igraph_data,"
+"0","#              layout = ""manual"", node.positions = data2)"
+"0","#layout_coordinates <- as.matrix(layout[, c(1,2)])"
+"0","#layout_v2 <- Rotation(layout_coordinates, 10*pi/180)"
+"0","#layout$x <- layout_v2[, 1]"
+"0","#layout$y <- layout_v2[, 2]"
+"0","#color the node."
+"0","temp.index <- which(layout$name %in% selected_features)"
+"0","group <- rep(""NO"", dim(layout)[1])"
+"0","group[temp.index] <- ""YES"""
+"0","layout$group <- factor(group)"
+"0",""
+"0","color <- rep(""NA"", dim(layout)[1])"
+"0","for(index in 1:dim(layout)[1]){"
+"0","  temp.index <- which(layout[index, ]$name == selected_features)"
+"0","  #print(temp.index)"
+"0","  if(length(temp.index) == 1){"
+"0","    color[index] <- Enriched_group[temp.index]"
+"0","  }"
+"0","}"
+"0","layout$color <- factor(color)"
+"0",""

@@ -1,0 +1,7 @@
+"0","#Load the meanAUC"
+"0","folder <- ""../ACS_UnifiedScore_inGC6_threeIntervals"""
+"0","data <- read.csv(file.path(folder, ""mean_AUC_SeroScore_FcR.csv""))"
+"0",""
+"0","#Get the index with max meanAUC"
+"0","index <- which.max(as.numeric(data))"
+"0","sel.data <- data[index]"

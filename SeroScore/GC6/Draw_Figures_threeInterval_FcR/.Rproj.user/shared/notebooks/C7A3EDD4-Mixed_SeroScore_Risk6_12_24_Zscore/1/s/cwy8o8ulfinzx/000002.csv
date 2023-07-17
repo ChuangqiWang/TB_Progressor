@@ -1,0 +1,35 @@
+"0","```r
+
+#Visualizing the heatmap 
+library(pheatmap)
+
+ordered_index <- order(DataScore$seroScore, DataScore$Risk6, DataScore$group)
+annotation_row_ordered <- DataScore[ordered_index, c(\"seroScore\", \"Risk6\", \"group\")]
+
+
+rownames(Combined.Dataset) <- rownames(DataScore)
+
+mat_breaks <- quantile_breaks(na.omit(unlist(scale(Combined.Dataset[, 1:7]))), n = 100)
+
+png(file.path(saved.dir, \"selected.features_scaled_v3.png\"), width=1000, height=1500, res = 300)
+pheatmap(
+  mat = scale(Combined.Dataset[ordered_index, 1:7]),
+  color = colorRampPalette(rev(brewer.pal(n = 8, name = \"RdBu\")))(length(mat_breaks) - 1),
+  breaks = mat_breaks,
+  border_color = NA,
+  #color = colorRampPalette(rev(brewer.pal(n = 8, name = \RdYlBu\)))(6),
+  show_rownames = FALSE,
+  show_colnames = TRUE,
+  cluster_rows = FALSE,
+  cluster_cols = FALSE,
+  annotation_row = annotation_row_ordered,
+  annotation_colors = meta_colors,
+  fontsize = 5,
+  fontsize_col = 6,
+  scale = \"none\"
+)
+dev.off()
+```"
+"1","null device 
+          1 
+"

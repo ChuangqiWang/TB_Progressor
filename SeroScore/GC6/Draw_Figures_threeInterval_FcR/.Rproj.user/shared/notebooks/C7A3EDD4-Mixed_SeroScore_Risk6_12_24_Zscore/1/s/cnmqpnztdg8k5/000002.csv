@@ -1,0 +1,12 @@
+"0","```r
+library(pheatmap)
+Features <- c(\"IgG1_LAM\", \"IgG2_PPD\", \"IgG2_ESAT6\", \"IgA1_PPD\", \"IgA2_PPD\", \"IgM_PPD\", \"FcgR3B_PPD\")
+Combined.Features <- c(Features, \"'Risk6'\")
+
+
+#Create a folder to save the results.
+saved.dir <- './mean_SeroScore_substract_zscore_v2'
+
+Combined.Dataset <- readRDS(file.path(saved.dir, \"Combined.Dataset.RDS\"))
+DataScore <- readRDS(file.path(saved.dir, \"DataScore.RDS\"))
+```"

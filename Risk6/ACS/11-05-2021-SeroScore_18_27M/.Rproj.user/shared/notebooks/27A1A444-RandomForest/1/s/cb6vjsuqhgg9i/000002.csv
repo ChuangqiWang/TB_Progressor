@@ -1,0 +1,21 @@
+"0","library(DMwR)"
+"2","Loading required package: lattice
+"
+"2","Loading required package: grid
+"
+"2","Registered S3 method overwritten by 'quantmod':
+  method            from
+  as.zoo.data.frame zoo 
+"
+"0","#Data a folder to save the results."
+"0","output_dir <- 'Progressor_9_18months'"
+"0",""
+"0","Data_group <- readRDS(file.path(output_dir, ""Data_group.RDS""))"
+"0","Data_group <- factor(Data_group, levels = c(""non-progressor"", ""progressor""))"
+"0","Data_combining <- readRDS(file.path(output_dir, ""Data_combining.RDS""))"
+"0",""
+"0","Data_combining_scale <- Data_combining"
+"0","#Z-score the data to bring the parameters to the same scale."
+"0","#Data_combining_scale <- scale(knnImputation(Data_combining), center = TRUE, scale = TRUE)"
+"0","#colnames(Data_combining_scale) <- colnames(Data_combining)"
+"0","#rownames(Data_combining_scale) <- rownames(Data_combining)"

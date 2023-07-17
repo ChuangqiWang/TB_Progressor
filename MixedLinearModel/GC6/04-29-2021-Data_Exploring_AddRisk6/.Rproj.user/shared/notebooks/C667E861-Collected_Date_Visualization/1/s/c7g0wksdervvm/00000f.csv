@@ -1,0 +1,4 @@
+"0","folder <- ""./results.adding"""
+"0",""
+"0","meta.data <- readRDS(file.path(folder, ""meta.data.RDS""))"
+"0","SystemSero <- readRDS(file.path(folder, ""SystemSerogy.RDS""))"

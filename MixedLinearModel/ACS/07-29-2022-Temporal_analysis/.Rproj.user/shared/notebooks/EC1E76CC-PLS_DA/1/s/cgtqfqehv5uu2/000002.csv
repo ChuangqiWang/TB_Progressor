@@ -1,0 +1,8 @@
+"0","```r
+## Provide the dir name(i.e sub dir) that you want to create under main dir:
+output_dir <- 'log2'
+
+if (!dir.exists(output_dir)){
+dir.create(output_dir)
+}
+```"

@@ -1,0 +1,122 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+meta_colors <- list(
+  "group" = c(
+    "NA" = "gray", 
+    "progressor" = "#AD07E3",
+    "non-progressor" = "#238b45"
+    )
+)
+``` 
+
+```{r}
+#Create a folder to save the results.
+saved.dir <- './SeroScore_substract_zscore'
+if (!dir.exists(saved.dir)){
+  dir.create((saved.dir))
+}
+```
+
+
+```{r}
+library(DMwR)
+#Data a folder to save the results.
+output_dir <- 'Progressor_0_9months'
+
+Data_group <- readRDS(file.path(output_dir, "Data_group.RDS"))
+Data_group <- factor(Data_group, levels = c("non-progressor", "progressor"))
+Data_combining <- readRDS(file.path(output_dir, "Data_combining.RDS"))
+
+Data_combining <- scale(Data_combining, center = TRUE, scale = TRUE)
+```
+
+```{r}
+interested.features <- c("totalIgG_PPD",  "totalIgG_LAM", 
+"IgG1_LAM",  "IgG1_PPD", "IgA1_LAM",  "IgA1_PPD", "IgM_LAM",  "IgM_PPD", 
+"FcgR2A_PPD", "FcgR2A_LAM", "FcgR2B_PPD", "FcgR2B_LAM","FcgR2B_Hspx",
+"SNA_LAM", "RCA_LAM", "SNA_Ag85", "RCA_Ag85", "SNA_PPD", "RCA_PPD",
+"Risk6"
+)
+
+Data_combining_selected <- Data_combining[, interested.features]
+y = Data_group
+y = gsub("non-progressor", 0, y)
+y = gsub("progressor", 1, y)
+
+data.df <- data.frame(y, Data_combining_selected)
+```
+
+
+
+
+Explore all the possible combination and evaluate them by ROC.
+```{r}
+Positive <- interested.features[1:8]
+
+n <- length(Positive)
+l <- rep(list(0:1), n)
+
+Post.index <- expand.grid(l)
+Post.index <- Post.index[-1, ]
+Post.Data <- Data_combining_selected[, Positive]
+colnames(Post.Data) <- Positive
+saveRDS(Post.Data, file.path(saved.dir, "Post.Data.RDS"))
+```
+
+```{r}
+Negative <- interested.features[14:19]
+
+n <- length(Negative)
+l <- rep(list(0:1), n)
+
+Neg.index <- expand.grid(l)
+Neg.index <- Neg.index[-1, ]
+Neg.Data <- Data_combining_selected[, Negative]
+colnames(Neg.Data) <- Negative
+saveRDS(Neg.Data, file.path(saved.dir, "Neg.Data.RDS"))
+```
+
+Define the sero Score
+
+```{r}
+Post.index <- Post.index[c(162, 97, 227), ]
+Neg.index <- Neg.index[c(50, 34), ]
+seroScore <- data.frame(matrix(NA, nrow = dim(Data_combining)[1], ncol = 3 * 2))
+curr.index <- 1
+for(index.p in 1 : dim(Post.index)[1]){
+  for(index.n in 1 : dim(Neg.index)[1]){
+    #For positive parts.
+    temp.post.index <- Post.index[index.p, ]
+    temp.post.index <- which(temp.post.index == 1)
+    if(length(temp.post.index) > 1){
+      Temp.pos <- rowSums(Post.Data[, temp.post.index]) #Sum each rows.
+    }else{
+      Temp.pos <- Post.Data[, temp.post.index]
+    }
+    
+    
+    #For negative parts.
+    temp.neg.index <- Neg.index[index.n, ]
+    temp.neg.index <- which(temp.neg.index == 1)
+    if(length(temp.neg.index) > 1){
+      Temp.neg <- rowSums(Neg.Data[, temp.neg.index]) #Sum each rows.
+    }else{
+      Temp.neg <- Neg.Data[, temp.neg.index]
+    }
+    
+    
+    #Calculate the difference.
+    Temp.value <- Temp.pos - Temp.neg
+    seroScore[, curr.index] <- Temp.value
+    curr.index <- curr.index + 1
+  }
+}
+
+saveRDS(seroScore, file.path(saved.dir, 'SeroScore.RDS'))
+write.csv(seroScore, file.path(saved.dir, "SeroScore.csv"))
+```
+

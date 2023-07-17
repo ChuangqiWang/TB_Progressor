@@ -1,0 +1,5 @@
+"0","#Create a folder to save the results."
+"0","saved.dir <- './mean_SeroScore_division_Zscore'"
+"0","if (!dir.exists(saved.dir)){"
+"0","  dir.create((saved.dir))"
+"0","}"

@@ -1,0 +1,5 @@
+"0","features <- colnames(SystemSerogy)"
+"0","temp.index <- grep(""albumin"", features)"
+"0","TB.seroSeorgy <- SystemSerogy[, -temp.index]"
+"0","Control.seroSerogy <- SystemSerogy[, temp.index]"
+"0",""

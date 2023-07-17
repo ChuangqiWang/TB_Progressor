@@ -1,0 +1,13 @@
+"0","```r
+VisitDates <- read_excel(file.path(folder.directory, 'VisitDates_ForBoston.xlsx'))
+
+Date.index <- c()
+for(index in 1 : dim(meta.data)[1])
+{
+  temp.index <- which(meta.data[index, ]$Ragon_ID == VisitDates$Ragon_ID)
+  Date.index <- c(Date.index, temp.index)
+}
+VisitDates.ordered <- VisitDates[Date.index, ]
+
+meta.data$VisitDate <- VisitDates.ordered$VisitDate
+```"

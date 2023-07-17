@@ -1,0 +1,18 @@
+"0","library(RColorBrewer)"
+"0","library(viridis)"
+"2","Loading required package: viridisLite
+"
+"2","
+Attaching package: ‘viridis’
+
+"
+"2","The following object is masked from ‘package:viridisLite’:
+
+    viridis.map
+
+"
+"0","quantile_breaks <- function(xs, n = 10) {"
+"0","  breaks <- quantile(xs, probs = seq(0, 1, length.out = n))"
+"0","  breaks[!duplicated(breaks)]"
+"0","}"
+"0",""

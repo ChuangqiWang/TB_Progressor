@@ -1,0 +1,19 @@
+"0","```r
+meta_colors <- list(
+  \"group\" = c(
+     #\"adult_neg\" = \"#A6CEE3\",
+    #\"adult_convalescent\" = \"#FFC080\",
+    #\"adult_symptomaticNP-\" = \"#CAB2D6\",
+    #\"adult_COVID_mild\" = \"#FB1583\",
+    #\"adult_COVID_severe\" = \"#5757F9\"
+    #\"adult_COVIDToes\" = \"#FF7F00\", 
+    #\"child_COVID_mild\" = \"#B4F8DF\"
+    \"progressor\" = \"#AD07E3\",
+    \"non-progressor\" = \"#D4D4D4\"
+    #\"child_MISC_mild\" = \"#EECCF9\"
+    #\"child_prePandemic\" = \"#6BAED6\",
+    #\"unknown\" = \"#636363\",
+    #\"unknown (recovered)\" = \"#bdbdbd\"
+    )
+)
+```"

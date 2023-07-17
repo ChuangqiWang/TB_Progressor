@@ -1,0 +1,48 @@
+"0","```r
+library(ropls)
+library(ggpubr)
+library(glmnet)
+set.seed(1234) # Fix random seed for demonstration purposes
+
+saved.dir <- './PLS_DA_Modeling_D000'
+if (!dir.exists(saved.dir)){
+  dir.create((saved.dir))
+}
+
+D000.logscale.matrix <- logscale.Data.matrix[, 1, ]
+nan.index <- which(is.na(D000.logscale.matrix), arr.ind=TRUE)
+nan.index <- unique(nan.index[, 1])
+
+
+D000.logscale.filter.matrix <- D000.logscale.matrix[-nan.index, ]
+Patient.ID.filter.group <- Patient.ID.wGroup[-nan.index, ]
+#Z-score the data to bring the parameters to the same scale.
+D000.logscale.normalizaion.matrix <- scale(D000.logscale.filter.matrix, center = TRUE, scale = TRUE)
+colnames(D000.logscale.normalizaion.matrix) <- SystemSerogy
+rownames(D000.logscale.normalizaion.matrix) <- Patient.ID.filter.group$progressors..Sample.ID.
+#Feature Selection
+res_lasso <- cv.glmnet(D000.logscale.normalizaion.matrix, Patient.ID.filter.group$progressors.Group, type.measure = \"mse\", 
+                        alpha = 0.8, family = \"binomial\", nfolds = 10)
+c <- coef(res_lasso, s = \"lambda.min\")
+inds <- which(c[,1] != 0)
+# remove intercept and get feature names
+selected_features <- names(inds[2:length(inds)])
+print(selected_features)
+```"
+"1","[1] \"totalIgG_PPD\"     \"totalIgG_LAM\"     \"IgG2_CFP10\"       \"IgG4_Ag85\"        \"IgA1_PPD\"        
+[6] \"IgM_CMV_pentamer\" \"FcgR2B_PPD\"       \"FcgR3B_PPD\"      
+"
+"0","```r
+X_sel <- D000.logscale.normalizaion.matrix[, selected_features]
+saveRDS(X_sel, file.path(saved.dir, 'data.sero.log10.mixed.zscore.featureselection.RDS'))
+
+
+
+
+png(file.path(saved.dir, 'opls.lasso.png'), width = 1960, height = 1960, res = 300)
+sacurine.opls <- opls(X_sel, Patient.ID.filter.group$progressors.Group, predI = 2)
+```"
+"1","PLS-DA
+115 samples x 8 variables and 1 response
+standard scaling of predictors and response(s)
+"

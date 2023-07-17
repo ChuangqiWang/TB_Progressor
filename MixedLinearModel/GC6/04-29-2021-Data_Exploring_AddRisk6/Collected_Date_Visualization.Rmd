@@ -1,0 +1,82 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r color label}
+meta_colors <- list(
+  "group" = c(
+    "NA" = "gray", 
+    "progressor" = "#fe9300",
+    "nonprogressor" = "#009093"
+    )
+)
+``` 
+
+```{r}
+folder <- "./results.adding"
+
+meta.data <- readRDS(file.path(folder, "meta.data.RDS"))
+SystemSero <- readRDS(file.path(folder, "SystemSerogy.RDS"))
+```
+
+
+```{r}
+#Create a folder to save the results.
+saved.dir <- './results.adding'
+if (!dir.exists(saved.dir)){
+  dir.create((saved.dir))
+}
+```
+
+```{r}
+options(digits=2)
+library(lubridate)
+
+ID.df <- unique(meta.data[, c(2, 3)])
+
+meta.data$VisitType.Cal <- array(NA, dim = dim(meta.data)[1])
+for(index in 1 : dim(ID.df)[1]){
+  temp.index <- which(ID.df[index, ]$ID == meta.data$ID)
+  Pat.metadata <- meta.data[temp.index, ]
+  min.date <- min(Pat.metadata$VisitDate)
+  VisitType <- c()
+  for(Pat.index in 1 : dim(Pat.metadata)[1]){
+    temp.VisitType <- time_length(interval(min.date, Pat.metadata[Pat.index, ]$VisitDate),"month")
+    VisitType <- c(VisitType, temp.VisitType)
+  }
+  meta.data[temp.index, ]$VisitType.Cal <- VisitType
+}
+
+meta.data$VisitType.Cal <- as.numeric(meta.data$VisitType.Cal)
+
+#saveRDS(meta.data, file.path(saved.dir, "meta.data.VisitType.RDS"))
+```
+
+```{r}
+library(ggplot2)
+ggplot(meta.data, aes(x = VisitType.Cal, fill = group)) +
+  geom_vline(xintercept = 0, linetype="dashed",
+                color = "gray", size=1) +
+  geom_vline(xintercept = 6, linetype="dashed",
+                color = "gray", size=1) +
+  geom_vline(xintercept = 12, linetype="dashed",
+                color = "gray", size=1) +
+  geom_vline(xintercept = 18, linetype="dashed",
+                color = "gray", size=1) +
+  geom_histogram(binwidth = 0.5, colour = "gray", size = 0.1, alpha = 0.5, position = "identity") +
+  geom_density(alpha = .3) + #alpha used for filling the density
+  scale_color_manual(values = meta_colors$group) +
+  scale_fill_manual(values = meta_colors$group) +
+
+  labs(x = "Monthes from first sample") +
+  theme_classic(base_size = 10)
+ggsave(file.path(saved.dir, "VisitType_v2.png"), width = 5, height = 3)
+```
+
+```{r}
+meta.data$BinTimetoTB <- cut(meta.data$VisitType.Cal, breaks = seq(0, 24, 6), right = FALSE)
+
+saveRDS(meta.data, file.path(saved.dir, "meta.data.VisitType.RDS"))
+```
+

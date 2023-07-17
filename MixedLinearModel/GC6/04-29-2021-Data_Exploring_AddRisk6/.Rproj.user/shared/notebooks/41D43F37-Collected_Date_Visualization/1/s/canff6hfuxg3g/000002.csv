@@ -1,0 +1,4 @@
+"0","folder <- ""../04-29-2021-Data_Exploring/results.adding"""
+"0",""
+"0","meta.data <- readRDS(file.path(folder, ""meta.data.RDS""))"
+"0","SystemSero <- readRDS(file.path(folder, ""SystemSerogy.RDS""))"

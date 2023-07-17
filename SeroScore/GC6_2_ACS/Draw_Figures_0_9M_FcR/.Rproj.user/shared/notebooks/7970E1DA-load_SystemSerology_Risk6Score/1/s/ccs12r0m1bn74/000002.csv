@@ -1,0 +1,12 @@
+"0","```r
+meta_colors <- list(
+  \"group\" = c(
+    \"progressor\" = \"#AD07E3\",
+    \"non-progressor\" = \"#238b45\"
+    ),
+  \"group1\" = c(
+    \"progressor\" = \"#AD07E3\",
+    \"non-progressor\" = \"#238b45\"
+    )
+)
+```"

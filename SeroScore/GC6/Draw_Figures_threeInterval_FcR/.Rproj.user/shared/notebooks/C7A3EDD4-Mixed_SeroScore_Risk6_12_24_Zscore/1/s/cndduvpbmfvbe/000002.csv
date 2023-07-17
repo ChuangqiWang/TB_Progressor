@@ -1,0 +1,9 @@
+"0","```r
+#Load the meanAUC
+folder <- \"../12-11-2022-Diff_Pro_vs_nonPro_threeInterval_risk5score_FcR\"
+data <- read.csv(file.path(folder, \"mean_AUC_SeroScore_FcR.csv\"))
+
+#Get the index with max meanAUC
+index <- which.max(as.numeric(data))
+sel.data <- data[index]
+```"

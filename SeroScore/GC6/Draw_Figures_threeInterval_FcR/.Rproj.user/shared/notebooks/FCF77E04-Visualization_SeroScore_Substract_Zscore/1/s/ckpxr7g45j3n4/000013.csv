@@ -1,0 +1,4 @@
+"0","data <- melt(data)
+"
+"2","No id variables; using all as measure variables
+"

@@ -1,0 +1,19 @@
+"0","filename <- 'RISK6_supplementary_Excel_file14Jan2020.xlsx'"
+"0",""
+"0","# Before reading data, we will return the names of the sheets for later use:"
+"0","sheets.name <- excel_sheets(file.path(folder.directory, filename))"
+"0","# xlsx files"
+"0","GC6_7_Risk6 <- read_excel(file.path(folder.directory, filename), sheet = sheets.name[6]) #GC6-7 Cohort"
+"1","[38;5;232mNew names:
+[36m*[38;5;232m [38;5;232m``[38;5;232m -> [38;5;232m`...2`[38;5;232m
+[36m*[38;5;232m [38;5;232m``[38;5;232m -> [38;5;232m`...3`[38;5;232m
+[36m*[38;5;232m [38;5;232m``[38;5;232m -> [38;5;232m`...4`[38;5;232m
+[36m*[38;5;232m [38;5;232m``[38;5;232m -> [38;5;232m`...5`[38;5;232m
+[36m*[38;5;232m [38;5;232m``[38;5;232m -> [38;5;232m`...6`[38;5;232m
+[36m*[38;5;232m [38;5;232m``[38;5;232m -> [38;5;232m`...7`[38;5;232m
+[36m*[38;5;232m [38;5;232m``[38;5;232m -> [38;5;232m`...8`[38;5;232m[39m
+"
+"0","colnames(GC6_7_Risk6) <- GC6_7_Risk6[2, ]"
+"0","GC6_7_Risk6 <- GC6_7_Risk6[3:476, ]"
+"0","temp.index <- which(GC6_7_Risk6$TB_STATUS == ""Control"")"
+"0","GC6_7_Risk6[temp.index, ]$TB_STATUS <- ""nonprogressor"""

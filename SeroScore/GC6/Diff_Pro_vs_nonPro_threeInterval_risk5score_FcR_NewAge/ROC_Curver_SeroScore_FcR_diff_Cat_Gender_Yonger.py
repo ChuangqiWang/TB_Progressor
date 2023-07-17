@@ -1,0 +1,161 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Fri Sep  3 07:55:05 2021
+
+@author: Chuangqi
+"""
+
+
+#https://www.analyticsvidhya.com/blog/2020/03/beginners-guide-random-forest-hyperparameter-tuning/
+
+import pandas
+import numpy as np
+import os
+from sklearn.model_selection import train_test_split, StratifiedKFold, GridSearchCV
+from sklearn import datasets
+from sklearn import svm
+from sklearn.ensemble import RandomForestClassifier, AdaBoostClassifier
+from sklearn.metrics import accuracy_score, roc_curve
+from sklearn.metrics import auc #plot_roc_curve, auc, RocCurveDisplay
+import matplotlib.pyplot as plt
+import matplotlib
+from plot_roc_curve_woPred_drawfigure import *
+
+def intersection(lst1, lst2):
+    lst3 = [value for value in lst1 if value in lst2]
+    return lst3
+
+def tri_intersection(lst1, lst2, lst4):
+    lst3 = [value for value in lst1 if value in lst2]
+    final_lst = [value for value in lst3 if value in lst4]
+    return final_lst
+
+##################################################0. Figure Setting
+font = {'family' : 'normal',
+        'weight' : 'bold',
+        'size'   : 10}
+
+matplotlib.rc('font', **font)
+
+SMALL_SIZE = 8
+MEDIUM_SIZE = 10
+BIGGER_SIZE = 12
+
+plt.rc('font', size=SMALL_SIZE)          # controls default text sizes
+plt.rc('axes', titlesize=SMALL_SIZE)     # fontsize of the axes title
+plt.rc('axes', labelsize=MEDIUM_SIZE)    # fontsize of the x and y labels
+plt.rc('xtick', labelsize=MEDIUM_SIZE)    # fontsize of the tick labels
+plt.rc('ytick', labelsize=MEDIUM_SIZE)    # fontsize of the tick labels
+plt.rc('legend', fontsize=SMALL_SIZE)    # legend fontsize
+plt.rc('figure', titlesize=BIGGER_SIZE)  # fontsize of the figure title
+##################################################1. Prepartion for Dataset
+## Load the data
+Data_Sero_RiskScore6 = pandas.read_csv('../Diff_Pro_vs_nonPro_threeInterval_risk5score_FcR/SeroScore_FcR_Lasso/SeroScore.csv', index_col=0)
+Data_Group = pandas.read_csv('../Diff_Pro_vs_nonPro_threeInterval_risk5score_FcR/Progressor_Allmonths_Test/Data_group.csv', index_col=0)
+Data_Sex = pandas.read_csv('../Diff_Pro_vs_nonPro_threeInterval_risk5score_FcR/Progressor_Allmonths_Test/Sex_cat.csv', index_col = 0)
+Temp_index = np.where(Data_Sex['x'] == "Male")[0]
+
+Data_Age = pandas.read_csv('Progressor_Allmonths_NewAge/Age_cat_threshold_Adolescent.csv', index_col = 0)
+Age_index = np.where(Data_Age['x'] == 1)[0]
+
+
+K_folder = 5
+################################################## Create the folder
+root = "SeroScore_ROC_Lasso_Difference_Adolescent_Male"
+if not os.path.exists(root):
+        os.makedirs(root)
+
+##################################################2. Many Iterations
+
+
+#class_weight={0: 1, 1: w}
+#model = RandomForestClassifier(n_estimators=10, class_weight='balanced', random_state=42)
+
+#Run each features
+colnames = Data_Sero_RiskScore6.columns
+for feature_index in [3911-1]: #range(Data_Sero_RiskScore6.shape[1]):
+    sel_features = colnames[feature_index]
+    sel_features_saved = sel_features.replace('/', '_')
+    ################################################## Create the folder
+    directory = root + "/" + sel_features_saved
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+    #Run 100 iterations
+    plt.rcParams["figure.figsize"] = (6, 6)
+    fig, ax = plt.subplots()
+    #Saving the parameter
+    tprs = []
+    aucs = []
+    mean_fpr = np.linspace(0, 1, 50)
+    total_Acc = []  
+    for iteration in range(50):  
+        Data_Sero = Data_Sero_RiskScore6[sel_features]
+        #Dataframe to numpy
+        X = Data_Sero.to_numpy()
+        y = Data_Group['x']
+        y = y == 'progressor'
+        y = y.array
+    
+        
+        #print("Iteration: %d" %(iteration))
+        #Get the training and test set
+        train_index = pandas.read_csv('../Diff_Pro_vs_nonPro_threeInterval_risk5score_FcR/Classification_RF_LASSO/idx_train_' + str(iteration+1) + '.csv')
+        train_index = train_index["Resample1"] - 1 #R and Python transformation
+        test_index = np.delete(np.arange(len(y)), train_index)
+        
+        #Get the index in each categories
+        train_index = tri_intersection(train_index, Temp_index, Age_index)
+        test_index = tri_intersection(test_index, Temp_index, Age_index)
+        #Train
+        X_train = X[train_index, ]
+        y_train = y[train_index]
+        #Test
+        X_test = X[test_index, ]
+        y_test = y[test_index]
+        #X_train_1, X_test_1, y_train_1, y_test_1 = train_test_split(X, y, test_size=0.2, random_state=iteration, stratify = y)
+        yhat = X_train
+
+        np.savez(os.path.join(directory, 'Iteration_' + str(iteration) + '_pred_actual_test.npz'), X_test, yhat, y_test)
+        
+        
+        ###### 4. ROC plot
+        viz = plot_roc_curve_woPred_drawfigure(yhat, y_train, name='Iteration {}'.format(iteration), alpha=0.3, lw=1, ax=ax)
+        #viz = plot_roc_curve_woPred(yhat, y_train, name='Iteration {}'.format(iteration), alpha=0.3, lw=1)
+        interp_tpr = np.interp(mean_fpr, viz.fpr, viz.tpr)
+        interp_tpr[0] = 0.0
+        tprs.append(interp_tpr)
+        aucs.append(viz.roc_auc)
+        
+    #find the nan value in nAUC
+    temp_index = np.argwhere(np.isnan(aucs))
+    aucs.pop(temp_index[0, 0])
+    tprs.pop(temp_index[0, 0])
+        
+    np.savez(os.path.join(directory, 'AUCparameter' + '.npz'), tprs, aucs, viz)
+    ax.plot([0, 1], [0, 1], linestyle='--', lw=2, color='r', label='Chance', alpha=.8)
+    #mean AUC
+    mean_tpr = np.mean(tprs, axis=0)
+    mean_tpr[-1] = 1.0
+    mean_auc = auc(mean_fpr, mean_tpr)
+    std_auc = np.std(aucs)
+    ax.plot(mean_fpr, mean_tpr, color='b',
+            label=r'Mean ROC (AUC = %0.2f $\pm$ %0.2f)' % (mean_auc, std_auc),
+            lw=2, alpha=.8)
+    np.savez(os.path.join(root, 'AUCparameter_mean_' + sel_features_saved + '.npz'), fpr = mean_fpr, auc = mean_auc, tpr = mean_tpr)
+    #std AUC
+    std_tpr = np.std(tprs, axis=0)
+    tprs_upper = np.minimum(mean_tpr + std_tpr, 1)
+    tprs_lower = np.maximum(mean_tpr - std_tpr, 0)
+    ax.fill_between(mean_fpr, tprs_lower, tprs_upper, color='grey', alpha=.2,
+                    label=r'$\pm$ 1 std. dev.')
+    #Plot
+    ax.set(xlim=[-0.05, 1.05], ylim=[-0.05, 1.05],
+            title="ROC:" + sel_features)
+    
+    handles, labels = ax.get_legend_handles_labels()
+    ax.legend([handles[index] for index in range(50, 53)], [labels[index] for index in range(50, 53)], loc="lower right")
+    # Put a legend to the right of the current axis
+    #ax.legend(loc='center left', bbox_to_anchor=(1, 0.5))
+    plt.savefig(os.path.join(directory, sel_features_saved + '.Sero.Data.LassoFeatures.HyperParameters.png'))
+    #plt.savefig(os.path.join(root, sel_features_saved + '.Sero.Data.LassoFeatures.HyperParameters.png'))
+    plt.show()

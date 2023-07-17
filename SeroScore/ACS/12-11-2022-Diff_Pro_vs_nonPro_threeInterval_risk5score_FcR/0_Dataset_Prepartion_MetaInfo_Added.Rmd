@@ -1,0 +1,207 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+
+
+```{r}
+folder <- "../../0_Frozen_Dataset"
+# Read a txt file, named "mtcars.txt"
+acs.risk6 <- read.table(file.path(folder, "acs_risk6scores.txt"), header = TRUE)
+```
+
+
+```{r}
+#Create a folder to save the results.
+results.folder <- '../../2_Experiments_02-23-2021_recap/02-23-2021-Data_Exploring/results'
+
+#Data.matrix = array(NA, dim = c(length(Patient.ID), length(VisitType), length(SystemSerogy)))
+Data.matrix <- readRDS(file.path(results.folder, 'Data.matrix.RDS'))
+Patient.ID.wGroup <- readRDS(file.path(results.folder, 'Patient.ID.wGroup.RDS'))
+Patient.ID.wGroup$progressors..Sample.ID. <- gsub("/", "", Patient.ID.wGroup$progressors..Sample.ID.)
+VisitType <- readRDS(file.path(results.folder, 'VisitType.RDS'))
+SystemSerogy <- readRDS(file.path(results.folder, 'SystemSerogy.RDS'))
+TimetoTB <- readRDS(file.path(results.folder, 'TimetoTB.RDS'))
+TimetoTB$progressors..Sample.ID. <- gsub("/", "", TimetoTB$progressors..Sample.ID.)
+```
+
+```{r logScale the data}
+# # RCA/SNA features are located from 111-122
+logscale.Data.matrix <- Data.matrix
+for(i in 1:88 ){
+  temp.matrix <- Data.matrix[ , ,i]
+  temp.matrix[temp.matrix < 0] <- 0
+  logscale.Data.matrix[, , i] <- log2(temp.matrix + 1)
+}
+
+for(i in 89:94 ){ #ADCP/ADNP
+  temp.matrix <- Data.matrix[ , ,i]
+  temp.matrix[temp.matrix < 0] <- 0
+  logscale.Data.matrix[, , i] <- temp.matrix
+}
+
+for(i in 95:122 ){
+  temp.matrix <- Data.matrix[ , ,i]
+  temp.matrix[temp.matrix < 0] <- 0
+  logscale.Data.matrix[, , i] <- log2(temp.matrix + 1)
+}
+
+for(i in 123:138){
+  temp.matrix <- Data.matrix[ , ,i]
+  #temp.matrix[temp.matrix < 0] <- 0
+  logscale.Data.matrix[, , i] <- temp.matrix
+}
+
+```
+
+```{r}
+New.Data.matrix <- array(NA, dim = c(141, 5, 139))
+New.Data.matrix[, , 1:138] <- logscale.Data.matrix
+for(Pat.index in 1 : 141){
+  for(Day.index in 1 : 5){
+    temp.Pat <- Patient.ID.wGroup[Pat.index, ]$progressors..Sample.ID.
+    temp.Pat <- gsub("^0", "", temp.Pat)
+    temp.Day <- VisitType[Day.index ]
+    temp.index <- which(temp.Day == acs.risk6$VisitType & temp.Pat == acs.risk6$SubjectID)
+    if(length(temp.index) == 1)
+      New.Data.matrix[Pat.index, Day.index, 139] <- acs.risk6[temp.index, ]$risk6Scores
+    else{
+      if(length(temp.index) > 1)
+        print("Multiple Risk6 measuers")
+    }
+  }
+}
+SystemSerogy.w.Risk6 <- c(SystemSerogy, "Risk6")
+saveRDS(SystemSerogy.w.Risk6, file.path(".", "SystemSerology.w.Risk6.RDS"))
+saveRDS(New.Data.matrix, file.path(".", "Data.matrix.w.Risk6score.RDS"))
+```
+
+
+Visualizing the different features based on Time2TB.
+```{r}
+TimetoTB.matrix <- array(NaN, dim= c(dim(Data.matrix)[1], dim(Data.matrix)[2]))
+for(pat.index in 1 : dim(Data.matrix)[1]){
+  Sample.ID <- Patient.ID.wGroup[pat.index, ]
+  Pat.ID <- Sample.ID$progressors..Sample.ID.
+  Pat.cat <- Sample.ID$progressors.Group
+  if(Pat.cat == "progressor"){
+    index <- which(TimetoTB$progressors..Sample.ID. == Pat.ID)
+    temp.Time2TB <- TimetoTB[index, ]
+    for(day.index in 1 : dim(temp.Time2TB)[1]){ #D000, D180, D360, D540, D630
+      temp.sample <- temp.Time2TB[day.index, ]
+      time2TB <- as.numeric(as.character(temp.sample$progressors.TimetoTB))
+      #print(time2TB)
+      temp.visitType <- temp.sample$progressors.VisitType
+      TimetoTB.matrix[pat.index, which(VisitType == temp.visitType)] = -1 *time2TB
+    }
+  }
+  
+}
+rownames(TimetoTB.matrix) <- rownames(Patient.ID.wGroup)
+saveRDS(TimetoTB.matrix, 'TimetoTB.matrix.RDS')
+
+```
+
+Only select the progressor and align them based on the TB day.
+```{r}
+library(reshape2)
+TimetoTB.index <- rowSums(is.nan(TimetoTB.matrix))<5
+TimetoTB.index <- which(TimetoTB.index == TRUE)
+
+Progressor.TimetoTB.matrix <- TimetoTB.matrix[TimetoTB.index, ]
+Progressor.TimetoTB.matrix.melt <- melt(Progressor.TimetoTB.matrix)
+
+#Progressor.Pat.ID
+Pat.ID <- Patient.ID.wGroup$progressors..Sample.ID.
+Progressor.Pat.ID <- Pat.ID[TimetoTB.index]
+
+#Pat.ID.group <- Patient.ID.wGroup$progressors.Group
+
+Progressor.Data.matrix <- New.Data.matrix[TimetoTB.index, ,]
+Progressor.Patient.ID.wgroup <- Patient.ID.wGroup[TimetoTB.index, ]
+#Progressor.TimetoTB.matrix <- TimetoTB.matrix[TimetoTB.index, ]
+
+NonProgressor.Data.matrix <- New.Data.matrix[-TimetoTB.index, ,]
+NonProgressor.Patient.ID.wgroup <- Patient.ID.wGroup[-TimetoTB.index, ]
+NonProgressor.TimetoTB.matrix <- TimetoTB.matrix[-TimetoTB.index, ]
+```
+
+```{r}
+## Provide the dir name(i.e sub dir) that you want to create under main dir:
+output_dir <- 'NonProgressors_New'
+
+if (!dir.exists(output_dir)){
+dir.create(output_dir)
+}
+saveRDS(NonProgressor.TimetoTB.matrix, file.path(output_dir, "NonProgressor.TimetoTB.matrix.RDS"))
+saveRDS(NonProgressor.Data.matrix, file.path(output_dir, "NonProgressor.RDS"))
+saveRDS(NonProgressor.Patient.ID.wgroup, file.path(output_dir, "NonProgressor.Patient.IDs.RDS"))
+saveRDS(SystemSerogy.w.Risk6, file.path(output_dir, "SystemSerogy.RDS"))
+```
+
+
+```{r}
+rm(list = setdiff(ls(), c("New.Data.matrix","NonProgressor.Data.matrix", "Progressor.Data.matrix", "TimetoTB.matrix", "Patient.ID.wGroup", "SystemSerogy.w.Risk6","output_dir", "Progressor.Patient.ID.wgroup", "Progressor.TimetoTB.matrix")))
+```
+
+```{r}
+library(reshape2)
+rownames(TimetoTB.matrix) <- c(1:141)
+colnames(TimetoTB.matrix) <- c(1:5) #c("D000", "D180", "D360", "D540", "D630")
+melt.TimetoTB <- melt(TimetoTB.matrix)
+```
+
+Extract the samples located in the first 9 monthes.
+```{r}
+## Provide the dir name(i.e sub dir) that you want to create under main dir:
+output_dir <- 'Progressor_allmonths_New'
+
+if (!dir.exists(output_dir)){
+dir.create(output_dir)
+}
+```
+
+
+```{r}
+temp.index <- which(melt.TimetoTB$value >= -720)
+Progress <- array(NA, dim = 139)
+Progression.ID <- c()
+Progressor.Patient.ID.wGroup <- c()
+Progressor.index <- c()
+for(index in temp.index){
+  temp.df <- melt.TimetoTB[index, ]
+  Progress <- rbind(Progress, New.Data.matrix[temp.df$Var1, temp.df$Var2, ])
+  Progression.ID <- c(Progression.ID, paste0("Progressor_", temp.df$Var1, "_", temp.df$Var2))
+  Progressor.Patient.ID.wGroup <- c(Progressor.Patient.ID.wGroup, Patient.ID.wGroup[temp.df$Var1, ]$progressors..Sample.ID.)
+  
+  Progressor.index <- c(Progressor.index, Patient.ID.wGroup[temp.df$Var1, ]$progressors.Group)
+}
+Progress <- Progress[-1, ]
+# Pat.index <- melt.TimetoTB[temp.index, ]$Var1
+# 
+# #Average the duplicated data.
+# Uni.Samples <- unique(Patient.ID.wGroup[Pat.index, ]$progressors..Sample.ID.)
+# Average.Progress <- array(NA, dim = c(length(Uni.Samples), 139))
+# for(index in 1 : length(Uni.Samples)){
+#   temp.index <- which(Patient.ID.wGroup[Pat.index, ]$progressors..Sample.ID. == Uni.Samples[index])
+#   if(length(temp.index) > 0){
+#     if(length(temp.index) > 1){
+#       Average.Progress[index, ] = colMeans(Progress[temp.index, ])
+#     }
+#     else{
+#       Average.Progress[index, ] = Progress[temp.index, ]
+#     }
+#   }
+#   else{
+#     print("Something is wrong! Missing")
+#   }
+# }
+
+#rownames(Average.Progress) <- Patient.ID.wGroup[temp.index, ]$progressors..Sample.ID. #Patient.ID.wGroup[Pat.index, ]$progressors..Sample.ID.
+rownames(Progress) <- Progression.ID
+colnames(Progress) <- SystemSerogy.w.Risk6
+saveRDS(Progress, file.path(output_dir, "Progressor_allmonths.RDS"))
+saveRDS(Progressor.Patient.ID.wGroup, file.path(output_dir, "Progressor_PatientID.RDS"))
+#saveRDS(NonProgressor.Data.matrix, file.path(output_dir, "NonProgressor.Data.matrix.RDS"))
+```

@@ -1,0 +1,6 @@
+"0",""
+"0","y = Data_group"
+"0","y = gsub(""non-progressor"", ""NO"", y)"
+"0","y = gsub(""progressor"", ""YES"", y)"
+"0",""
+"0","data.df <- data.frame(y = factor(y), x = Data_combining_scale) #[, selected_features]) 15"

@@ -1,0 +1,11 @@
+"0","```r
+method = list(train = train_ropls,
+              predict = predict_ropls,
+              score = score_accuracy)
+opts = list(n_folds = 7, pt_trials = 0)
+return_vals <- validate(X, y, method, opts)
+print(paste(\"Performance in 7-fold cv:\", round(return_vals$cv_score, digits = 2), \"accuracy\"))
+
+```"
+"1","[1] \"Performance in 7-fold cv: 0.78 accuracy\"
+"

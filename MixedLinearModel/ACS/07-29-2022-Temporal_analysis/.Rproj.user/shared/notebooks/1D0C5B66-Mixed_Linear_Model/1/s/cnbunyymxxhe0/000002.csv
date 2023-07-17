@@ -1,0 +1,11 @@
+"0","response <- feature.name[feat.index]
+  print(response)
+"
+"1","[1]"
+"1"," ""totalIgG_PPD"""
+"1","
+"
+"0","  temp.data.mlm <- meta.sero.data[, c(1:12, feat.index + 12)]"
+"0","  colnames(temp.data.mlm)[13] <- 'response'"
+"0","  #Basic model without considering Pat.clinical.label variable."
+"0","  model.null <- lmer(response ~ 1 + Sex + AgeAtLastBirthDay + SchoolCode  + VisitType  + (1|SubjectID), data = temp.data.mlm, REML = FALSE)"

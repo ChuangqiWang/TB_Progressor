@@ -1,0 +1,25 @@
+{
+    "id": "BF1BC1E9",
+    "path": "C:/0_IMPAcTB_Alter/7_Experiments_11-03-2021/11-05-2021-SeroScore_18_27M/load_SystemSerology_Risk6Score.Rmd",
+    "project_path": "load_SystemSerology_Risk6Score.Rmd",
+    "type": "r_markdown",
+    "hash": "4042930781",
+    "contents": "",
+    "dirty": false,
+    "created": 1636457361591.0,
+    "source_on_save": false,
+    "relative_order": 1,
+    "properties": {
+        "chunk_output_type": "inline",
+        "cursorPosition": "71,29",
+        "scrollLine": "80"
+    },
+    "folds": "",
+    "lastKnownWriteTime": 1636457394,
+    "encoding": "UTF-8",
+    "collab_server": "",
+    "source_window": "",
+    "last_content_update": 1636457394419,
+    "read_only": false,
+    "read_only_alternatives": []
+}

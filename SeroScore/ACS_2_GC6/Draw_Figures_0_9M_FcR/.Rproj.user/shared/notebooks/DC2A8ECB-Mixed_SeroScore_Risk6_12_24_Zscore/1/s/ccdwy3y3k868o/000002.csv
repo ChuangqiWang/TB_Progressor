@@ -1,0 +1,7 @@
+"0","```r
+#Create a folder to save the results.
+saved.dir <- './mean_SeroScore_substract_zscore_v2'
+if (!dir.exists(saved.dir)){
+  dir.create((saved.dir))
+}
+```"

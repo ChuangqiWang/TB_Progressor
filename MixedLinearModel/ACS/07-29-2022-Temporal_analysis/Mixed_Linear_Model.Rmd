@@ -1,0 +1,184 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+load the dataset.
+```{r}
+meta.sero.data <- readRDS('meta.sero.data.RDS')
+feature.name <- colnames(meta.sero.data)
+feature.name <- gsub("/", "_", feature.name)
+colnames(meta.sero.data) <- feature.name
+feature.name <- colnames(meta.sero.data)[13:110]
+meta.sero.data$SubjectID <- factor(meta.sero.data$SubjectID)
+meta.sero.data$Progressor <- factor(as.character(meta.sero.data$Progressor))
+meta.sero.data$Group <- factor(meta.sero.data$Group, levels = c('non-progressor', 'progressor'))
+```
+
+Do linear mixed model to compare the explainative significance of each feature related to Clinical.label.
+```{r}
+library(lme4)
+#Create a folder to save the results.
+saved.dic <- './LinearMixedModel.VisitDate'
+if (!dir.exists(saved.dic)){
+  dir.create((saved.dic))
+}
+#Build two models with or without clinical.label and then compare the significance using anova (likehood ratio test)
+pvalue <- c()
+coefficient <- data.frame()
+t.value <- data.frame()
+for(feat.index in 1:length(feature.name)){
+  response <- feature.name[feat.index]
+  print(response)
+  temp.data.mlm <- meta.sero.data[, c(1:12, feat.index + 12)]
+  colnames(temp.data.mlm)[13] <- 'response'
+  #Basic model without considering Pat.clinical.label variable.
+  model.null <- lmer(response ~ 1 + Sex + AgeAtLastBirthDay + SchoolCode + VisitType  + (1|SubjectID), data = temp.data.mlm, REML = FALSE)
+  saveRDS(summary(model.null), file.path(saved.dic, paste(response, 'null.model.RDS')))
+  saveRDS(coef(model.null)$SubjectID, file.path(saved.dic, paste(response, 'null.mode.coeff.RDS')))
+  
+  print("Full")
+  #Alternative model with Pat.clinical.label variable.
+  model.alternative <- lmer(response ~ 1 + Sex + AgeAtLastBirthDay + SchoolCode + VisitType + Group  + (1|SubjectID), data = temp.data.mlm, REML = FALSE)
+  saveRDS(summary(model.alternative), file.path(saved.dic, paste(response, 'alternative.model.RDS')))
+  saveRDS(coef(model.alternative)$SubjectID, file.path(saved.dic, paste(response, 'alternative.mode.coeff.RDS')))
+  #
+  #model.alternative Summary
+  summary.model.alternative <- summary(model.alternative)
+  coefficient <- rbind(coefficient, summary.model.alternative$coefficients[, 1])
+  t.value <- rbind(t.value, summary.model.alternative$coefficients[, 3])
+  
+  
+  #Likelihood ratio test
+  LRT <- anova(model.alternative, model.null)
+  saveRDS(LRT, file.path(saved.dic, paste(response, 'LRT.RDS')))
+  pvalue <- c(pvalue, LRT$`Pr(>Chisq)`[2])
+}
+
+saveRDS(pvalue, 'pvalue.RDS')
+saveRDS(coefficient, 'coefficient.RDS')
+
+colnames(coefficient) <- rownames(summary.model.alternative$coefficients)
+rownames(coefficient) <- feature.name
+coefficient.pLRT <- coefficient
+coefficient.pLRT$pvalue <- pvalue
+saveRDS(coefficient.pLRT, 'coefficient.pLRT.value.RDS')
+
+colnames(t.value) <- rownames(summary.model.alternative$coefficients)
+rownames(t.value) <- feature.name
+t.value.pLRT <- t.value
+t.value.pLRT$pvalue <- pvalue
+saveRDS(t.value.pLRT, 't.value.pLRT.value.RDS')
+```
+
+
+```{r visualization pvalue and effect size}
+library(gridExtra)
+library(grid)
+library(ggplot2)
+library(lattice)
+library(ggrepel)
+
+#Create a folder to save the results.
+saved.dic <- './Visualization.LinearMixedModel.VisitDate'
+if (!dir.exists(saved.dic)){
+  dir.create((saved.dic))
+}
+
+
+
+coefficient.size.pLRT <- readRDS('coefficient.pLRT.value.RDS')
+# Add text to the plot
+.labs <- rownames(coefficient.size.pLRT)
+# effect size between label2 vs 1
+ggplot(coefficient.size.pLRT, aes(Groupprogressor, -log10(pvalue))) +
+  labs(x = 'Coefficient: nonprogressor vs progressor', y = '-log10(pvalue.LRT') +
+  geom_point(position = position_jitter(width = 0.01, height = 0.01)) + 
+  geom_hline(yintercept=-log10(0.05), linetype="dashed", color = "red", size=1) +
+  #geom_vline(xintercept=0.8, linetype="dashed", color = "red", size=1) +
+  geom_text_repel(aes(label = .labs), size = 2) +
+  #scale_color_manual(values = c("#00AFBB", "#E7B800", "#FC4E07"))
+  theme_classic()
+ggsave(file.path(saved.dic, 'nonprogressor vs progressor coefficient.png'), height = 6, width = 6, dpi = 300)
+
+
+
+t.value.size.pLRT <- readRDS('t.value.pLRT.value.RDS')
+# Add text to the plot
+.labs <- rownames(t.value.size.pLRT)
+# effect size between label2 vs 1
+ggplot(t.value.size.pLRT, aes(Groupprogressor, -log10(pvalue))) +
+  labs(x = 'T value: nonprogressor vs progressor', y = '-log10(pvalue.LRT') +
+  geom_point(position = position_jitter(width = 0.01, height = 0.01)) + 
+  geom_hline(yintercept=-log10(0.05), linetype="dashed", color = "red", size=1) +
+  #geom_vline(xintercept=0.8, linetype="dashed", color = "red", size=1) +
+  geom_text_repel(aes(label = .labs), size = 2) +
+  #scale_color_manual(values = c("#00AFBB", "#E7B800", "#FC4E07"))
+  theme_classic()
+ggsave(file.path(saved.dic, 'nonprogressor vs progressor Tvalue.png'), height = 6, width = 6, dpi = 300)
+
+```
+
+Mutiple-testing-Correction
+```{r}
+library(ggplot2)
+library(ggrepel)
+
+
+t.value.size.pLRT <- readRDS('t.value.pLRT.value.RDS')
+#Adjust the pvalue based on BH method.
+pvalue.adjust <- p.adjust(t.value.size.pLRT$pvalue, method = 'BH')
+t.value.size.pLRT$pvalue.adjust <- pvalue.adjust
+saveRDS(t.value.size.pLRT, 't.value.pLRT.value.RDS')
+# Add text to the plot
+feature.labs <- rownames(t.value.size.pLRT)
+
+# Add text to the plot
+.labs <- rownames(t.value.size.pLRT)
+t.value.size.pLRT$feature_class <- rep("FcR", length = nrow(t.value.size.pLRT))
+t.value.size.pLRT$feature_class[which(grepl("IgG|IgA|IgM", .labs))] <- "titer"
+t.value.size.pLRT$feature_class[which(grepl("RCA|SNA", .labs))] <- "Lectin"
+t.value.size.pLRT$feature_class[which(grepl("ADNP|ADCP", .labs))] <- "Function"
+t.value.size.pLRT$feature_class <- factor(t.value.size.pLRT$feature_class)
+
+t.value.size.pLRT$Antigen <- rep("PPD", length = nrow(t.value.size.pLRT))
+t.value.size.pLRT$Antigen[which(grepl("_ESAT6", .labs))] <- "ESAT6"
+t.value.size.pLRT$Antigen[which(grepl("_Hspx", .labs))] <- "Hspx"
+t.value.size.pLRT$Antigen[which(grepl("_CFP10", .labs))] <- "CFP10"
+t.value.size.pLRT$Antigen[which(grepl("_Ag85", .labs))] <- "Ag85"
+t.value.size.pLRT$Antigen[which(grepl("_CMV_pentamer", .labs))] <- "CMV_pentamer"
+t.value.size.pLRT$Antigen[which(grepl("_CMV_gB", .labs))] <- "CMV_gB"
+t.value.size.pLRT$Antigen[which(grepl("_EBV", .labs))] <- "EBV"
+t.value.size.pLRT$Antigen[which(grepl("_Tbad", .labs))] <- "Tbad"
+t.value.size.pLRT$Antigen[which(grepl("_LAM", .labs))] <- "LAM"
+
+# Add text to the plot
+feature.labs <- rownames(t.value.size.pLRT)
+temp.index <- which(pvalue.adjust >= 0.05)
+feature.labs[temp.index] <- ""
+# effect size between label2 vs 1
+ggplot(t.value.size.pLRT, aes(Groupprogressor, -log10(pvalue.adjust))) +
+  labs(x = 'T value: progressor vs nonprogressor', y = '-log10(BH.adjused.pvalue.LRT)') +
+  geom_point(aes(color = Antigen), size = 2, position = position_jitter(width = 0.01, height = 0.01)) + 
+  geom_hline(yintercept=-log10(0.05), linetype="dashed", color = "gray", size=1) +
+  #geom_vline(xintercept=0.8, linetype="dashed", color = "red", size=1) +
+  geom_text_repel(aes(label = feature.labs), size = 3.5) +
+  #scale_color_manual(values = c("#00AFBB", "#E7B800", "#FC4E07"))
+  theme_classic()
+ggsave(file.path(saved.dic, 'nonprogressor vs progressor Tvalue BH_correction_v4.png'), height = 5, width = 5, dpi = 300)
+ggsave(file.path(saved.dic, 'nonprogressor vs progressor Tvalue BH_correction_v4.pdf'), height = 5, width = 5, dpi = 300, useDingbats=FALSE)
+
+
+# effect size between label2 vs 1
+ggplot(t.value.size.pLRT, aes(Groupprogressor, -log10(pvalue.adjust))) +
+  labs(x = 'T value: nonprogressor vs progressor', y = '-log10(BH.adjused.pvalue.LRT)') +
+  geom_point(position = position_jitter(width = 0.01, height = 0.01)) + 
+  geom_hline(yintercept=-log10(0.05), linetype="dashed", color = "gray", size=1) +
+  #geom_vline(xintercept=0.8, linetype="dashed", color = "red", size=1) +
+  geom_text_repel(aes(label = feature.labs), size = 3) +
+  #scale_color_manual(values = c("#00AFBB", "#E7B800", "#FC4E07"))
+  theme_classic()
+ggsave(file.path(saved.dic, 'nonprogressor vs progressor Tvalue BH_correction.png'), height = 6, width = 6, dpi = 300)
+ggsave(file.path(saved.dic, 'nonprogressor vs progressor Tvalue BH_correction.pdf'), height = 6, width = 6, dpi = 300, useDingbats=FALSE)
+
+```

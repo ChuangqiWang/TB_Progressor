@@ -1,0 +1,30 @@
+"0","```r
+
+ggplot(melt.Data.distribution.df, aes(variable, factor(Patient.ID, levels = ordered.Patient.ID))) +
+  geom_tile(aes(fill = value), colour = \"white\") +
+  scale_fill_gradient(low = \"white\", high = \"red\") + 
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  labs(x = 'Times') +
+  geom_hline(yintercept=36, linetype=\"dashed\", color = \"yellow\", size=1) +
+  coord_flip()
+ggsave(file.path(saved.dic, \"timedot.png\"), width = 18, height = 4)
+```"
+"0","```r
+
+#Replot the position in different groups.
+Data.distribution.df.groups <- Data.distribution.df
+Data.distribution.df.groups$groups <- Patient.ID.wGroup$progressors.Group
+
+progressor.index <- which(Data.distribution.df.groups$groups == 'progressor')
+Data.distribution.df.progressor <- Data.distribution.df.groups[progressor.index, ]
+#melt mtcars into long format
+melt.progressor <- melt(Data.distribution.df.progressor)
+```"
+"1","Using groups as id variables
+"
+"0","```r
+#add column for car name
+melt.progressor$Patient.ID <- rep(row.names(Data.distribution.df.progressor), 5)
+#view first six rows of melt_mtcars
+head(melt.progressor)
+```"

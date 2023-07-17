@@ -1,0 +1,15 @@
+"0","```r
+# 
+eliminating.antigen <- c('Ebola', 'HA')
+Ebola.related <- grep('Ebola', SystemSerogy, value=TRUE)
+HA.related <- grep('HA', SystemSerogy, value=TRUE)
+
+excluded.features <- c(Ebola.related, HA.related)
+
+feature.index <- which(SystemSerogy %in% excluded.features)
+
+SystemSerogy <- setdiff(SystemSerogy, excluded.features)
+
+Data.matrix <- Data.matrix[, , -feature.index]
+
+```"

@@ -1,0 +1,10 @@
+"0","```r
+
+ggplot(melt.non.progressor, aes(x = variable, y = Patient.ID, fill = groups)) +
+  geom_tile(aes(fill = value), colour = \"white\") +
+  scale_fill_gradient(low = \"white\", high = \"blue\") + 
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  labs(x = 'Times') +
+  coord_flip()
+ggsave(file.path(saved.dic, \"timedot.non.progressor.png\"), width = 14, height = 4)
+```"
